@@ -5,192 +5,65 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>花雨落</title>
 <style>
-  *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-  :root {
-    --background: #0f0f23;
-    --foreground: #e0e0e0;
-    --card: #16162e;
-    --card-foreground: #e0e0e0;
-    --primary: #4fc3f7;
-    --primary-foreground: #0a0a1a;
-    --muted: #2a2a4a;
-    --muted-foreground: #999;
-    --border: #2a2a4a;
-    --ring: #4fc3f7;
-    --viz-series-1: #4fc3f7;
-    --viz-series-2: #ff8a65;
-    --viz-series-3: #81c784;
-    --viz-series-4: #ffd54f;
-    --viz-series-5: #ce93d8;
-    --viz-series-6: #ef5350;
-    --destructive: #ef5350;
-  }
-  html, body {
-    height: 100%;
-    background: var(--background);
-    color: var(--foreground);
-    font-family: "PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",ui-monospace,monospace;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    touch-action: none;
-    overscroll-behavior: none;
-    overflow: hidden;
-  }
-  body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100dvh;
-    padding: 8px;
-  }
-  #game-root {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    user-select: none;
-    -webkit-user-select: none;
-    width: 100%;
-    max-width: 400px;
-    font-family: "PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",ui-monospace,monospace;
-    touch-action: none;
-  }
-  #game-root .game-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 4px;
-    width: 100%;
-  }
-  #game-root .header-group { display: flex; align-items: center; gap: 6px; }
-  #game-root .header-group.header-right { margin-left: auto; }
-  #game-root .score-label { font-size: 11px; letter-spacing: 1.5px; color: var(--muted-foreground); }
-  #game-root .score-value { font-size: 20px; font-weight: 500; color: var(--foreground); min-width: 32px; text-align: right; }
-  #game-canvas-wrapper {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 400 / 460;
-    border-radius: 0 0 8px 8px;
-    overflow: hidden;
-  }
-  #timer-bar-wrapper {
-    width: 100%;
-    height: 4px;
-    background: var(--border);
-    border-radius: 2px;
-    overflow: hidden;
-    flex-shrink: 0;
-  }
-  #timer-bar {
-    height: 100%;
-    background: var(--viz-series-1);
-    border-radius: 2px;
-    transition: width 0.1s linear;
-  }
-  #game-canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-    background: var(--card);
-    outline: none;
-    cursor: default;
-    touch-action: none;
-  }
-  #game-canvas:focus-visible { box-shadow: 0 0 0 2px var(--ring); }
-  #game-root .overlay {
-    position: absolute;
-    inset: 0;
-    top: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: color-mix(in srgb, var(--card) 88%, transparent);
-    border-radius: 0 0 8px 8px;
-    transition: opacity 0.25s;
-  }
-  #game-root .overlay.hidden { opacity: 0; pointer-events: none; }
-  #game-root .overlay-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    text-align: center;
-    padding: 20px;
-    width: 100%;
-    max-width: 320px;
-  }
-  #game-root .overlay-title { font-size: 28px; font-weight: 500; letter-spacing: 4px; margin: 0; color: var(--foreground); }
-  #game-root .overlay-sub { margin: 0; font-size: 13px; color: var(--muted-foreground); line-height: 1.5; }
-  #game-root .overlay-btn {
-    font-family: inherit;
-    font-size: 15px;
-    letter-spacing: 1px;
-    padding: 10px 28px;
-    margin-top: 2px;
-    cursor: pointer;
-    border: none;
-    border-radius: 6px;
-    background: var(--primary);
-    color: var(--primary-foreground);
-    transition: opacity 0.15s;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-  }
-  #game-root .overlay-btn:active { opacity: 0.7; }
-  #game-root .btn-group { display: flex; gap: 10px; margin-top: 4px; }
-  #game-root .btn-group.hidden { display: none; }
-  #game-root .controls-hint { display: flex; align-items: center; gap: 6px; color: var(--muted-foreground); margin-top: 2px; }
-  #game-root .controls-hint kbd {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-width: 22px; height: 22px; padding: 0 6px;
-    font-family: inherit; font-size: 12px;
-    border: 1px solid var(--border); border-radius: 4px;
-    background: var(--background); color: var(--foreground);
-  }
-  #game-root .controls-hint svg { width: 16px; height: 16px; opacity: 0.6; }
-  #game-root .final-score { font-size: 32px; font-weight: 500; color: var(--viz-series-1); }
-  #game-root .new-best { font-size: 11px; letter-spacing: 2px; color: var(--viz-series-1); animation: pulse-bright 0.6s ease-in-out infinite alternate; }
-  @keyframes pulse-bright { from { opacity: 0.6; } to { opacity: 1; } }
-  #game-root .level-map { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px; width: 100%; max-height: 420px; overflow-y: auto; }
-  #game-root .level-map-title { font-size: 16px; font-weight: 500; letter-spacing: 2px; margin: 0 0 6px 0; color: var(--foreground); }
-  #game-root .level-map-path { display: flex; flex-direction: column; align-items: center; gap: 0; width: 100%; padding: 0 8px; }
-  #game-root .level-map-row { display: flex; align-items: center; gap: 12px; width: 100%; justify-content: center; }
-  #game-root .level-map-node {
-    width: 44px; height: 44px; min-width: 44px;
-    border-radius: 50%; border: 2px solid var(--border);
-    background: var(--background); color: var(--muted-foreground);
-    font-family: inherit; font-size: 14px; font-weight: 500;
-    cursor: default; display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s; position: relative; flex-shrink: 0;
-    -webkit-tap-highlight-color: transparent;
-    touch-action: manipulation;
-  }
-  #game-root .level-map-node.completed { border-color: var(--viz-series-1); background: color-mix(in srgb, var(--viz-series-1) 15%, transparent); color: var(--viz-series-1); }
-  #game-root .level-map-node.current { border-color: var(--primary); background: var(--primary); color: var(--primary-foreground); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent); animation: node-pulse 1.5s ease-in-out infinite; }
-  #game-root .level-map-node.unlocked { border-color: var(--border); color: var(--foreground); cursor: pointer; }
-  #game-root .level-map-node.unlocked:hover { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, transparent); }
-  #game-root .level-map-node.locked { opacity: 0.35; cursor: default; }
-  #game-root .level-map-node .check-mark { position: absolute; top: -4px; right: -4px; width: 16px; height: 16px; background: var(--viz-series-1); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-  #game-root .level-map-node .check-mark svg { width: 10px; height: 10px; stroke: white; stroke-width: 3; }
-  #game-root .level-map-connector { width: 2px; height: 18px; background: var(--border); margin: 0 auto; flex-shrink: 0; }
-  #game-root .level-map-connector.done { background: var(--viz-series-1); }
-  #game-root .level-map-connector.partial { background: linear-gradient(to bottom, var(--viz-series-1) 50%, var(--border) 50%); }
-  @keyframes node-pulse { 0%,100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent); } 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--primary) 20%, transparent); } }
-  @media (max-width: 420px) {
-    body { padding: 4px; }
-    #game-root .overlay-content { padding: 12px; gap: 8px; }
-    #game-root .overlay-title { font-size: 24px; }
-    #game-root .score-value { font-size: 17px; min-width: 28px; }
-    #game-root .score-label { font-size: 10px; }
-    #game-root .level-map-node { width: 38px; height: 38px; min-width: 38px; font-size: 12px; }
-    #game-root .level-map-connector { height: 14px; }
-    #game-root .level-map { max-height: 360px; }
-  }
-  @media (max-width: 360px) {
-    #game-root .overlay-title { font-size: 20px; }
-    #game-root .overlay-btn { font-size: 13px; padding: 8px 20px; }
-    #game-root .level-map-node { width: 32px; height: 32px; min-width: 32px; font-size: 11px; }
-  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{--bg:#0a0a1a;--fg:#e8e0d8;--card:#14142a;--card-fg:#e8e0d8;--primary:#c8a87c;--primary-fg:#0a0a1a;--muted:#2a2040;--muted-fg:#998e88;--border:#2a2040;--ring:#c8a87c;--gold:#c8a87c;--gold-dim:#8a7050;--series1:#c8a87c;--series2:#d4845a;--series3:#7aa89c;--series4:#d4b84a;--series5:#a88ab8;--series6:#c85a5a;--destructive:#c85a5a}
+  html,body{height:100%;background:var(--bg);color:var(--fg);font-family:"Noto Serif SC","Source Han Serif SC","STSong","SimSun","Songti SC",serif;-webkit-font-smoothing:antialiased;overflow:hidden}
+  body{display:flex;align-items:center;justify-content:center;min-height:100dvh;padding:8px;background:radial-gradient(ellipse at 50% 0%,#1a1030 0%,#0a0a1a 60%)}
+  body::before{content:"";position:fixed;inset:0;background-image:radial-gradient(circle at 20% 50%,rgba(200,168,124,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+  #game-root{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:6px;user-select:none;-webkit-user-select:none;width:100%;max-width:420px;font-family:inherit}
+  #game-root .game-header{display:flex;align-items:center;gap:8px;padding:0 4px;width:100%}
+  #game-root .header-group{display:flex;align-items:center;gap:6px}
+  #game-root .header-group.header-right{margin-left:auto}
+  #game-root .score-label{font-size:11px;letter-spacing:2px;color:var(--muted-fg)}
+  #game-root .score-value{font-size:20px;font-weight:500;color:var(--fg);min-width:32px;text-align:right;font-feature-settings:"tnum"}
+  #game-canvas-wrapper{position:relative;width:100%;aspect-ratio:400/460;border-radius:0 0 8px 8px;overflow:hidden;box-shadow:0 0 30px rgba(200,168,124,0.08)}
+  #timer-bar-wrapper{width:100%;height:4px;background:var(--border);border-radius:2px;overflow:hidden;flex-shrink:0}
+  #timer-bar{height:100%;border-radius:2px;transition:width 0.1s linear;background:linear-gradient(90deg,var(--series2),var(--gold))}
+  #game-canvas{display:block;width:100%;height:100%;background:var(--card);outline:none;touch-action:none}
+  #game-canvas:focus-visible{box-shadow:inset 0 0 0 2px var(--ring)}
+  #game-root .overlay{position:absolute;inset:0;top:0;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--card) 90%,transparent);border-radius:0 0 8px 8px;transition:opacity 0.3s}
+  #game-root .overlay.hidden{opacity:0;pointer-events:none}
+  #game-root .overlay-content{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:20px;width:100%;max-width:320px;touch-action:manipulation}
+  #game-root .overlay-title{font-size:32px;font-weight:500;letter-spacing:6px;margin:0;color:var(--gold);text-shadow:0 0 20px rgba(200,168,124,0.3)}
+  #game-root .overlay-sub{margin:0;font-size:13px;color:var(--muted-fg);line-height:1.6}
+  #game-root .credit-line{font-size:11px;color:var(--gold-dim);letter-spacing:1px;margin-top:2px;opacity:0.7;text-align:center}
+  #game-root .divider{width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--gold-dim),transparent);margin:2px 0}
+  #game-root .overlay-btn{font-family:inherit;font-size:15px;letter-spacing:2px;padding:10px 32px;margin-top:2px;cursor:pointer;border:1px solid var(--gold);border-radius:4px;background:transparent;color:var(--gold);transition:all 0.2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;position:relative}
+  #game-root .overlay-btn:hover{background:var(--gold);color:var(--primary-fg)}
+  #game-root .overlay-btn:active{transform:scale(0.96)}
+  #game-root .overlay-btn.primary{background:var(--gold);color:var(--primary-fg)}
+  #game-root .overlay-btn.primary:hover{background:color-mix(in srgb,var(--gold) 85%,black)}
+  #game-root .btn-group{display:flex;gap:10px;margin-top:4px}
+  #game-root .btn-group.hidden{display:none}
+  #game-root .controls-hint{display:flex;align-items:center;gap:6px;color:var(--muted-fg);margin-top:6px}
+  #game-root .controls-hint kbd{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;font-family:"PingFang SC",sans-serif;font-size:12px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--fg)}
+  #game-root .controls-hint svg{width:16px;height:16px;opacity:0.5;stroke:var(--muted-fg)}
+  #game-root .final-score{font-size:32px;font-weight:500;color:var(--gold)}
+  #game-root .new-best{font-size:11px;letter-spacing:2px;color:var(--gold);animation:pulse-bright 0.6s ease-in-out infinite alternate}
+  @keyframes pulse-bright{from{opacity:0.6}to{opacity:1}}
+  #game-root .level-map{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;width:100%;max-height:420px;overflow-y:auto}
+  #game-root .level-map-path{display:flex;flex-direction:column;align-items:center;gap:0;width:100%;padding:0 8px}
+  #game-root .level-map-row{display:flex;align-items:center;gap:12px;width:100%;justify-content:center}
+  #game-root .level-map-node{width:44px;height:44px;min-width:44px;border-radius:50%;border:2px solid var(--border);background:var(--bg);color:var(--muted-fg);font-family:inherit;font-size:14px;font-weight:500;cursor:default;display:flex;align-items:center;justify-content:center;transition:all 0.3s;position:relative;flex-shrink:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+  #game-root .level-map-node.completed{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 12%,transparent);color:var(--gold)}
+  #game-root .level-map-node.current{border-color:var(--gold);background:var(--gold);color:var(--primary-fg);box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 30%,transparent),0 0 12px rgba(200,168,124,0.2);animation:node-pulse 1.5s ease-in-out infinite}
+  #game-root .level-map-node.unlocked{border-color:var(--border);color:var(--fg);cursor:pointer}
+  #game-root .level-map-node.unlocked:hover{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 8%,transparent)}
+  #game-root .level-map-node.locked{opacity:0.3;cursor:default}
+  #game-root .level-map-node .check-mark{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center}
+  #game-root .level-map-node .check-mark svg{width:10px;height:10px;stroke:var(--primary-fg);stroke-width:3}
+  #game-root .level-map-connector{width:2px;height:18px;background:var(--border);margin:0 auto;flex-shrink:0}
+  #game-root .level-map-connector.done{background:var(--gold)}
+  #game-root .level-map-connector.partial{background:linear-gradient(to bottom,var(--gold) 50%,var(--border) 50%)}
+  @keyframes node-pulse{0%,100%{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 30%,transparent),0 0 12px rgba(200,168,124,0.2)}50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--gold) 20%,transparent),0 0 20px rgba(200,168,124,0.15)}}
+  #game-root .level-intro{position:absolute;inset:0;top:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-radius:0 0 8px 8px;opacity:0;transition:opacity 0.5s;pointer-events:none;background:color-mix(in srgb,var(--card) 92%,transparent)}
+  #game-root .level-intro.show{opacity:1}
+  #game-root .level-intro .li-level{font-size:14px;letter-spacing:4px;color:var(--muted-fg)}
+  #game-root .level-intro .li-number{font-size:48px;font-weight:500;color:var(--gold);text-shadow:0 0 30px rgba(200,168,124,0.3)}
+  #game-root .level-intro .li-flower{font-size:16px;letter-spacing:2px;color:var(--fg);margin-top:4px}
+  #game-root .level-intro .li-poem{font-size:13px;color:var(--gold-dim);font-style:italic;letter-spacing:1px;opacity:0.8}
+  @media(max-width:420px){body{padding:4px}#game-root .overlay-content{padding:12px;gap:8px}#game-root .overlay-title{font-size:26px}#game-root .score-value{font-size:17px;min-width:28px}#game-root .score-label{font-size:10px}#game-root .level-map-node{width:38px;height:38px;min-width:38px;font-size:12px}#game-root .level-map-connector{height:14px}#game-root .level-map{max-height:360px}#game-root .level-intro .li-number{font-size:38px}}
+  @media(max-width:360px){#game-root .overlay-title{font-size:22px}#game-root .overlay-btn{font-size:13px;padding:8px 20px}#game-root .level-map-node{width:32px;height:32px;min-width:32px;font-size:11px}#game-root .level-intro .li-number{font-size:30px}}
 </style>
 </head>
 <body>
@@ -202,509 +75,312 @@
   </div>
   <div id="timer-bar-wrapper"><div id="timer-bar" style="width:100%"></div></div>
   <div id="game-canvas-wrapper">
-    <canvas id="game-canvas" width="400" height="460" tabindex="0" role="img" aria-label="花雨落游戏，滑动或拖拽移动小球躲避方块，每关15秒。"></canvas>
+    <canvas id="game-canvas" width="400" height="460" tabindex="0"></canvas>
     <div id="overlay" class="overlay">
       <div id="overlay-content" class="overlay-content">
+        <div class="divider"></div>
         <h2 id="overlay-title" class="overlay-title">花雨落</h2>
-        <p id="overlay-sub" class="overlay-sub">每关15秒，躲避落块，步步惊心<br>十大险关等你来闯</p>
-        <button id="action-btn" class="overlay-btn">开始闯关</button>
+        <div class="divider"></div>
+        <p id="overlay-sub" class="overlay-sub">每关十五息，落块如飞雨<br>十大险关，步步惊心</p>
+        <button id="action-btn" class="overlay-btn primary">开始闯关</button>
         <div id="btn-group" class="btn-group hidden">
-          <button id="retry-btn" class="overlay-btn" style="background:var(--primary);color:var(--primary-foreground);">重试本关</button>
-          <button id="map-btn" class="overlay-btn" style="background:var(--card);color:var(--foreground);border:1px solid var(--border);">闯关地图</button>
-        </div>
-        <div class="controls-hint">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
-          <span class="text-small">或</span>
-          <span class="text-small"><kbd>A</kbd> <kbd>D</kbd></span>
+          <button id="retry-btn" class="overlay-btn primary">重试本关</button>
+          <button id="map-btn" class="overlay-btn">闯关地图</button>
         </div>
       </div>
     </div>
+    <div id="level-intro" class="level-intro">
+      <div class="li-level">第 <span id="li-number" class="li-number">一</span> 关</div>
+      <div id="li-flower" class="li-flower"></div>
+      <div id="li-poem" class="li-poem"></div>
+    </div>
   </div>
+  <p class="credit-line">由 YanYue 赠 M1 Pro 所制</p>
 </div>
 
 <script>
-(function() {
-  var root = document.getElementById("game-root");
-  var canvas = document.getElementById("game-canvas");
-  var ctx = canvas.getContext("2d");
-  var overlay = document.getElementById("overlay");
-  var overlayTitle = document.getElementById("overlay-title");
-  var overlaySub = document.getElementById("overlay-sub");
-  var actionBtn = document.getElementById("action-btn");
-  var retryBtn = document.getElementById("retry-btn");
-  var mapBtn = document.getElementById("map-btn");
-  var btnGroup = document.getElementById("btn-group");
-  var scoreEl = document.getElementById("score");
-  var bestEl = document.getElementById("best");
-  var levelDisplay = document.getElementById("level-display");
-  var timerBar = document.getElementById("timer-bar");
+(function(){
+  var root=document.getElementById("game-root");
+  var canvas=document.getElementById("game-canvas");
+  var ctx=canvas.getContext("2d");
+  var overlay=document.getElementById("overlay");
+  var overlayTitle=document.getElementById("overlay-title");
+  var overlaySub=document.getElementById("overlay-sub");
+  var actionBtn=document.getElementById("action-btn");
+  var retryBtn=document.getElementById("retry-btn");
+  var mapBtn=document.getElementById("map-btn");
+  var btnGroup=document.getElementById("btn-group");
+  var scoreEl=document.getElementById("score");
+  var bestEl=document.getElementById("best");
+  var levelDisplay=document.getElementById("level-display");
+  var timerBar=document.getElementById("timer-bar");
+  var levelIntro=document.getElementById("level-intro");
+  var liNumber=document.getElementById("li-number");
+  var liFlower=document.getElementById("li-flower");
+  var liPoem=document.getElementById("li-poem");
 
-  var W = 400, H = 460, P_SIZE = 22, B_SIZE = 20;
-  var LEVEL_TIME = 15, PETAL_DURATION = 4000;
-
-  var FLOWER_TYPES = [
-    { name: "茉莉花", color: "#f5ece0", center: "#e8d4a0", size: 5 },
-    { name: "樱花", color: "#ffb7c5", center: "#ff8fa3", size: 5 },
-    { name: "梅花", color: "#e63946", center: "#c1121f", size: 4 },
-    { name: "桃花", color: "#ffc8dd", center: "#ffafcc", size: 5 },
-    { name: "薰衣草", color: "#b39ddb", center: "#7c4dff", size: 4 },
-    { name: "向日葵", color: "#ffd54f", center: "#5d4037", size: 6 },
-    { name: "荷花", color: "#f8bbd0", center: "#f06292", size: 6 },
-    { name: "桂花", color: "#ffe082", center: "#ff8f00", size: 3 },
-    { name: "菊花", color: "#ce93d8", center: "#8e24aa", size: 5 },
-    { name: "玫瑰花", color: "#e91e63", center: "#880e4f", size: 5 },
+  var W=400,H=460,PS=22,BS=20;
+  var LT=15,PD=4000;
+  var LV=["一","二","三","四","五","六","七","八","九","十"];
+  var POEMS=[
+    "雪落无声，暗香浮动",
+    "落英缤纷，刹那芳华",
+    "凌寒独放，傲骨铮铮",
+    "人面桃花，相映成红",
+    "紫雾弥漫，幽香满怀",
+    "心向骄阳，灿烂如初",
+    "出淤不染，濯涟不妖",
+    "金粟满枝，十里飘香",
+    "待到秋来，我花开后",
+    "带刺柔情，红颜如血",
   ];
 
-  var LEVELS = [
-    { speed: 0.7, interval: 950, flowerIdx: 0 },
-    { speed: 0.9, interval: 880, flowerIdx: 1 },
-    { speed: 1.1, interval: 820, flowerIdx: 2 },
-    { speed: 1.3, interval: 760, flowerIdx: 3 },
-    { speed: 1.6, interval: 700, flowerIdx: 4 },
-    { speed: 1.9, interval: 640, flowerIdx: 5 },
-    { speed: 2.2, interval: 580, flowerIdx: 6 },
-    { speed: 2.6, interval: 520, flowerIdx: 7 },
-    { speed: 3.0, interval: 460, flowerIdx: 8 },
-    { speed: 3.5, interval: 400, flowerIdx: 9 },
+  var FLOWER_TYPES=[
+    {name:"茉莉花",color:"#f5ece0",size:5},
+    {name:"樱花",color:"#ffb7c5",size:5},
+    {name:"梅花",color:"#e63946",size:4},
+    {name:"桃花",color:"#ffc8dd",size:5},
+    {name:"薰衣草",color:"#b39ddb",size:4},
+    {name:"向日葵",color:"#ffd54f",size:6},
+    {name:"荷花",color:"#f8bbd0",size:6},
+    {name:"桂花",color:"#ffe082",size:3},
+    {name:"菊花",color:"#ce93d8",size:5},
+    {name:"玫瑰花",color:"#e91e63",size:5},
   ];
 
-  var player, blocks, particles, petals, score, state, animId;
-  var spawnTimer, difficultyTimer, levelTimer, levelIndex;
-  var keys = {};
-  var totalLevels = LEVELS.length;
-  var completedLevels = [];
-  var petalTimer = 0;
+  var LEVELS=[
+    {spd:0.7,iv:950,fi:0},{spd:0.9,iv:880,fi:1},
+    {spd:1.1,iv:820,fi:2},{spd:1.3,iv:760,fi:3},
+    {spd:1.6,iv:700,fi:4},{spd:1.9,iv:640,fi:5},
+    {spd:2.2,iv:580,fi:6},{spd:2.6,iv:520,fi:7},
+    {spd:3.0,iv:460,fi:8},{spd:3.5,iv:400,fi:9},
+  ];
 
-  var curBest = parseInt(localStorage.getItem("dodgeDropBest") || "0", 10);
-  var savedProgress = (localStorage.getItem("dodgeDropProgress") || "").split(",").filter(Boolean).map(Number);
-  completedLevels = savedProgress;
-  bestEl.textContent = curBest;
+  var pl,bl,pt,pe,sc,st,aid,si,di,lvlTimer,li,ke={},tl=LEVELS.length,cl=[],peTi=0;
+  var cb=parseInt(localStorage.getItem("ddBest")||"0",10);
+  var sp=(localStorage.getItem("ddProg")||"").split(",").filter(Boolean).map(Number);
+  cl=sp;bestEl.textContent=cb;
 
-  function getColors() {
-    var s = getComputedStyle(root);
-    return {
-      fg: s.getPropertyValue("--foreground").trim(),
-      muted: s.getPropertyValue("--muted-foreground").trim(),
-      card: s.getPropertyValue("--card").trim(),
-      bg: s.getPropertyValue("--background").trim(),
-      border: s.getPropertyValue("--border").trim(),
-      series1: s.getPropertyValue("--viz-series-1").trim(),
-      series2: s.getPropertyValue("--viz-series-2").trim(),
-      series3: s.getPropertyValue("--viz-series-3").trim(),
-      destructive: s.getPropertyValue("--destructive").trim(),
-      primary: s.getPropertyValue("--primary").trim(),
+  function gc(){
+    var s=getComputedStyle(root);
+    return{
+      fg:s.getPropertyValue("--fg").trim(),
+      mf:s.getPropertyValue("--muted-fg").trim(),
+      cd:s.getPropertyValue("--card").trim(),
+      bg:s.getPropertyValue("--bg").trim(),
+      bd:s.getPropertyValue("--border").trim(),
+      s1:s.getPropertyValue("--gold").trim(),
+      s2:s.getPropertyValue("--series2").trim(),
+      s3:s.getPropertyValue("--series3").trim(),
+      ds:s.getPropertyValue("--destructive").trim(),
     };
   }
 
-  function saveProgress() {
-    localStorage.setItem("dodgeDropProgress", completedLevels.join(","));
+  function save(){localStorage.setItem("ddProg",cl.join(","))}
+
+  function rrc(ctx,x,y,w,h,r){
+    ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
+    ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);
+    ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
+    ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);
+    ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
   }
 
-  function drawRoundRect(ctx, x, y, w, h, r) {
-    ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
+  function dp(ctx,x,y,sz,an,co,al){
+    ctx.save();ctx.translate(x,y);ctx.rotate(an);ctx.globalAlpha=al;
+    ctx.fillStyle=co;ctx.beginPath();
+    ctx.ellipse(sz*0.15,-sz*0.5,sz*0.25,sz*0.5,0,0,Math.PI*2);
+    ctx.fill();ctx.strokeStyle=co;ctx.globalAlpha=al*0.25;ctx.lineWidth=0.5;
+    ctx.beginPath();ctx.moveTo(sz*0.15,-sz*0.05);ctx.lineTo(sz*0.15,-sz*0.9);
+    ctx.stroke();ctx.restore();
   }
 
-  function drawPetal(ctx, x, y, size, angle, color, alpha) {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(angle);
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.ellipse(size * 0.15, -size * 0.5, size * 0.25, size * 0.5, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = color;
-    ctx.globalAlpha = alpha * 0.25;
-    ctx.lineWidth = 0.5;
-    ctx.beginPath();
-    ctx.moveTo(size * 0.15, -size * 0.05);
-    ctx.lineTo(size * 0.15, -size * 0.9);
-    ctx.stroke();
-    ctx.restore();
+  function initLvl(idx){
+    li=idx;pl={x:W/2,y:H-36,r:PS/2};bl=[];pt=[];pe=[];
+    sc=0;si=0;di=0;lvlTimer=LT*1000;peTi=0;
+    scoreEl.textContent="0";levelDisplay.textContent=idx+1;
+    actionBtn.style.display="";btnGroup.classList.add("hidden");
+    overlay.classList.add("hidden");levelIntro.classList.remove("show");
+    st="playing";
   }
 
-  function initLevel(idx) {
-    levelIndex = idx;
-    player = { x: W / 2, y: H - 36, r: P_SIZE / 2 };
-    blocks = []; particles = []; petals = [];
-    score = 0; spawnTimer = 0; difficultyTimer = 0;
-    levelTimer = LEVEL_TIME * 1000; petalTimer = 0;
-    scoreEl.textContent = "0";
-    levelDisplay.textContent = idx + 1;
-    actionBtn.style.display = "";
-    btnGroup.classList.add("hidden");
-    overlay.classList.add("hidden");
-    state = "playing";
+  function sb(){
+    var c=gc();var l=LEVELS[Math.min(li,LEVELS.length-1)];
+    var w=BS+Math.random()*16;var h=BS+Math.random()*16;
+    var x=Math.random()*(W-w-10)+5;
+    var spd=l.spd+Math.random()*l.spd*0.8+sc*0.002;
+    var cs=[c.s1,c.s2,c.s3,c.ds,c.mf];
+    var co=cs[Math.floor(Math.random()*cs.length)]||c.s1;
+    bl.push({x:x,y:-h,w:w,h:h,spd:Math.min(spd,6.5),co:co,rot:Math.random()*Math.PI*2,rs:(Math.random()-0.5)*0.05});
   }
 
-  function spawnBlock() {
-    var c = getColors();
-    var lvl = LEVELS[Math.min(levelIndex, LEVELS.length - 1)];
-    var w = B_SIZE + Math.random() * 16;
-    var h = B_SIZE + Math.random() * 16;
-    var x = Math.random() * (W - w - 10) + 5;
-    var speed = lvl.speed + Math.random() * lvl.speed * 0.8 + score * 0.002;
-    var colors = [c.series1, c.series2, c.series3, c.destructive, c.muted];
-    var color = colors[Math.floor(Math.random() * colors.length)] || c.series1;
-    blocks.push({ x: x, y: -h, w: w, h: h, speed: Math.min(speed, 6.5), color: color, rot: Math.random() * Math.PI * 2, rotSpeed: (Math.random() - 0.5) * 0.05 });
+  function spw(x,y,co,n){for(var i=0;i<n;i++){var a=Math.random()*Math.PI*2;var s=1+Math.random()*3;pt.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,l:1,d:0.015+Math.random()*0.025,sz:2+Math.random()*4,co:co})}}
+
+  function spwPe(n){
+    var l=LEVELS[Math.min(li,LEVELS.length-1)];
+    var f=FLOWER_TYPES[l.fi];
+    for(var i=0;i<n;i++){pe.push({x:Math.random()*(W+40)-20,y:Math.random()*H*-0.5-10,sz:f.size*(0.5+Math.random()*0.8),an:Math.random()*Math.PI*2,rs:(Math.random()-0.5)*0.06,vx:(Math.random()-0.5)*0.8,vy:0.3+Math.random()*0.8,sw:Math.random()*0.03,so:Math.random()*Math.PI*2,co:f.color,al:0.6+Math.random()*0.4})}
   }
 
-  function spawnParticles(x, y, color, count) {
-    for (var i = 0; i < count; i++) {
-      var angle = Math.random() * Math.PI * 2;
-      var spd = 1 + Math.random() * 3;
-      particles.push({ x: x, y: y, vx: Math.cos(angle) * spd, vy: Math.sin(angle) * spd, life: 1, decay: 0.015 + Math.random() * 0.025, size: 2 + Math.random() * 4, color: color });
+  function upd(dt){
+    if(st==="playing"){
+      var dx=0;if(ke["ArrowLeft"]||ke["KeyA"])dx=-1;if(ke["ArrowRight"]||ke["KeyD"])dx=1;
+      pl.x+=dx*300*(dt/1000);pl.x=Math.max(pl.r,Math.min(W-pl.r,pl.x));
+      lvlTimer-=dt;var pct=Math.max(0,lvlTimer/(LT*1000));timerBar.style.width=(pct*100)+"%";
+      if(lvlTimer<=0){sc=Math.max(sc,1);scoreEl.textContent=sc;onLvlDone();return}
+      di+=dt;if(di>1000){sc++;scoreEl.textContent=sc;di=0}
+      var l=LEVELS[Math.min(li,LEVELS.length-1)];si+=dt;
+      if(si>=l.iv){var n=Math.floor(si/l.iv);for(var i=0;i<Math.min(n,3);i++)sb();si=si%l.iv}
+      for(var i=bl.length-1;i>=0;i--){var b=bl[i];b.y+=b.spd;b.rot+=b.rs;var cx=Math.max(b.x,Math.min(pl.x,b.x+b.w));var cy=Math.max(b.y,Math.min(pl.y,b.y+b.h));var ddx=pl.x-cx;var ddy=pl.y-cy;if(ddx*ddx+ddy*ddy<pl.r*pl.r){spw(pl.x,pl.y,gc().ds,25);onGO();return}if(b.y>H+b.h)bl.splice(i,1)}
+      for(var i=pt.length-1;i>=0;i--){var p=pt[i];p.x+=p.vx;p.y+=p.vy;p.vy+=0.05;p.l-=p.d;if(p.l<=0)pt.splice(i,1)}
+    }
+    if(st==="flower"){
+      peTi-=dt;if(peTi>0&&pe.length<80)spwPe(3);
+      for(var i=pe.length-1;i>=0;i--){var p=pe[i];p.x+=p.vx+Math.sin(p.so+performance.now()*p.sw)*0.5;p.y+=p.vy;p.an+=p.rs;if(p.y>H+20)pe.splice(i,1)}
+      if(peTi<=0&&pe.length===0)showMap()
     }
   }
 
-  function spawnPetals(count) {
-    var lvl = LEVELS[Math.min(levelIndex, LEVELS.length - 1)];
-    var flower = FLOWER_TYPES[lvl.flowerIdx];
-    for (var i = 0; i < count; i++) {
-      petals.push({
-        x: Math.random() * (W + 40) - 20,
-        y: Math.random() * H * -0.5 - 10,
-        size: flower.size * (0.5 + Math.random() * 0.8),
-        angle: Math.random() * Math.PI * 2,
-        rotSpeed: (Math.random() - 0.5) * 0.06,
-        vx: (Math.random() - 0.5) * 0.8,
-        vy: 0.3 + Math.random() * 0.8,
-        sway: Math.random() * 0.03,
-        swayOffset: Math.random() * Math.PI * 2,
-        color: flower.color,
-        alpha: 0.6 + Math.random() * 0.4,
-      });
+  function draw(){
+    var c=gc();ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle=c.bd;ctx.lineWidth=0.5;ctx.globalAlpha=0.08;
+    for(var x=0;x<=W;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+    for(var y=0;y<=H;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+    ctx.globalAlpha=1;
+    for(var i=0;i<bl.length;i++){var b=bl[i];ctx.save();ctx.translate(b.x+b.w/2,b.y+b.h/2);ctx.rotate(b.rot);ctx.fillStyle=b.co;ctx.globalAlpha=0.75;rrc(ctx,-b.w/2,-b.h/2,b.w,b.h,4);ctx.fill();ctx.globalAlpha=0.3;ctx.strokeStyle=c.bd;ctx.lineWidth=1;ctx.stroke();ctx.restore()}
+    for(var i=0;i<pt.length;i++){var p=pt[i];ctx.globalAlpha=p.l;ctx.fillStyle=p.co;ctx.beginPath();ctx.arc(p.x,p.y,p.sz*p.l,0,Math.PI*2);ctx.fill()}
+    ctx.globalAlpha=1;
+    if(st==="playing"){
+      var px=pl.x,py=pl.y,pr=pl.r;
+      var grd=ctx.createRadialGradient(px,py,0,px,py,pr*2.5);
+      var base=c.s1;var rgba=base.replace("rgb(","rgba(").replace(")",",0.2)");
+      grd.addColorStop(0,rgba.indexOf("rgba")!==-1?rgba:"rgba(200,168,124,0.2)");grd.addColorStop(1,"transparent");
+      ctx.fillStyle=grd;ctx.beginPath();ctx.arc(px,py,pr*2.5,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle=c.s1;ctx.globalAlpha=0.85;ctx.beginPath();ctx.arc(px,py,pr,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle=c.cd;ctx.globalAlpha=0.3;ctx.beginPath();ctx.arc(px-pr*0.25,py-pr*0.25,pr*0.4,0,Math.PI*2);ctx.fill()
+    }
+    ctx.globalAlpha=1;
+    if(st==="flower"){for(var i=0;i<pe.length;i++){var p=pe[i];dp(ctx,p.x,p.y,p.sz,p.an,p.co,p.al)}}
+  }
+
+  function startLevel(idx,showIntro){
+    if(showIntro!==false){
+      st="intro";cancelAnimationFrame(aid);
+      var l=LEVELS[Math.min(idx,LEVELS.length-1)];
+      var f=FLOWER_TYPES[l.fi];
+      liNumber.textContent=LV[idx];
+      liFlower.textContent=f.name;
+      liPoem.textContent=POEMS[idx];
+      levelIntro.classList.add("show");
+      overlay.classList.add("hidden");
+      setTimeout(function(){
+        levelIntro.classList.remove("show");
+        setTimeout(function(){initLvl(idx);loop(performance.now())},500);
+      },1800);
+    }else{
+      initLvl(idx);loop(performance.now())
     }
   }
 
-  function update(dt) {
-    if (state === "playing") {
-      var moveSpeed = 300;
-      var dx = 0;
-      if (keys["ArrowLeft"] || keys["KeyA"]) dx = -1;
-      if (keys["ArrowRight"] || keys["KeyD"]) dx = 1;
-      player.x += dx * moveSpeed * (dt / 1000);
-      player.x = Math.max(player.r, Math.min(W - player.r, player.x));
-
-      levelTimer -= dt;
-      var pct = Math.max(0, levelTimer / (LEVEL_TIME * 1000));
-      timerBar.style.width = (pct * 100) + "%";
-
-      if (levelTimer <= 0) {
-        score = Math.max(score, 1);
-        scoreEl.textContent = score;
-        onLevelComplete();
-        return;
-      }
-
-      difficultyTimer += dt;
-      if (difficultyTimer > 1000) {
-        score++;
-        scoreEl.textContent = score;
-        difficultyTimer = 0;
-      }
-
-      var lvl = LEVELS[Math.min(levelIndex, LEVELS.length - 1)];
-      spawnTimer += dt;
-      if (spawnTimer >= lvl.interval) {
-        var count = Math.floor(spawnTimer / lvl.interval);
-        for (var i = 0; i < Math.min(count, 3); i++) spawnBlock();
-        spawnTimer = spawnTimer % lvl.interval;
-      }
-
-      for (var i = blocks.length - 1; i >= 0; i--) {
-        var b = blocks[i];
-        b.y += b.speed;
-        b.rot += b.rotSpeed;
-        var cx = Math.max(b.x, Math.min(player.x, b.x + b.w));
-        var cy = Math.max(b.y, Math.min(player.y, b.y + b.h));
-        var ddx = player.x - cx;
-        var ddy = player.y - cy;
-        if (ddx * ddx + ddy * ddy < player.r * player.r) {
-          spawnParticles(player.x, player.y, getColors().destructive, 25);
-          onGameOver();
-          return;
-        }
-        if (b.y > H + b.h) blocks.splice(i, 1);
-      }
-
-      for (var i = particles.length - 1; i >= 0; i--) {
-        var p = particles[i];
-        p.x += p.vx; p.y += p.vy;
-        p.vy += 0.05;
-        p.life -= p.decay;
-        if (p.life <= 0) particles.splice(i, 1);
-      }
-    }
-
-    if (state === "flower-shower") {
-      petalTimer -= dt;
-      if (petalTimer > 0 && petals.length < 80) { spawnPetals(3); }
-      for (var i = petals.length - 1; i >= 0; i--) {
-        var p = petals[i];
-        p.x += p.vx + Math.sin(p.swayOffset + performance.now() * p.sway) * 0.5;
-        p.y += p.vy;
-        p.angle += p.rotSpeed;
-        if (p.y > H + 20) petals.splice(i, 1);
-      }
-      if (petalTimer <= 0 && petals.length === 0) showLevelMap();
-    }
-  }
-
-  function draw() {
-    var c = getColors();
-    ctx.clearRect(0, 0, W, H);
-
-    ctx.strokeStyle = c.border;
-    ctx.lineWidth = 0.5;
-    ctx.globalAlpha = 0.1;
-    for (var x = 0; x <= W; x += 30) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
-    for (var y = 0; y <= H; y += 30) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
-    ctx.globalAlpha = 1;
-
-    for (var i = 0; i < blocks.length; i++) {
-      var b = blocks[i];
-      ctx.save();
-      ctx.translate(b.x + b.w / 2, b.y + b.h / 2);
-      ctx.rotate(b.rot);
-      ctx.fillStyle = b.color;
-      ctx.globalAlpha = 0.75;
-      drawRoundRect(ctx, -b.w/2, -b.h/2, b.w, b.h, 4);
-      ctx.fill();
-      ctx.globalAlpha = 0.3;
-      ctx.strokeStyle = c.border;
-      ctx.lineWidth = 1;
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    for (var i = 0; i < particles.length; i++) {
-      var p = particles[i];
-      ctx.globalAlpha = p.life;
-      ctx.fillStyle = p.color;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-
-    if (state === "playing") {
-      var px = player.x, py = player.y, pr = player.r;
-      var grad = ctx.createRadialGradient(px, py, 0, px, py, pr * 2.5);
-      var baseCol = c.series1;
-      var rgba = baseCol.replace("rgb(", "rgba(").replace(")", ", 0.2)");
-      grad.addColorStop(0, rgba.indexOf("rgba") !== -1 ? rgba : "rgba(100,100,255,0.2)");
-      grad.addColorStop(1, "transparent");
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(px, py, pr * 2.5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = c.series1;
-      ctx.globalAlpha = 0.9;
-      ctx.beginPath();
-      ctx.arc(px, py, pr, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = c.card;
-      ctx.globalAlpha = 0.35;
-      ctx.beginPath();
-      ctx.arc(px - pr * 0.25, py - pr * 0.25, pr * 0.4, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.globalAlpha = 1;
-    }
-
-    if (state === "flower-shower") {
-      for (var i = 0; i < petals.length; i++) {
-        var p = petals[i];
-        drawPetal(ctx, p.x, p.y, p.size, p.angle, p.color, p.alpha);
-      }
-    }
-  }
-
-  function onLevelComplete() {
-    state = "flower-shower";
-    cancelAnimationFrame(animId);
-    timerBar.style.width = "0%";
-    if (completedLevels.indexOf(levelIndex) === -1) { completedLevels.push(levelIndex); saveProgress(); }
-    var finalScore = score;
-    if (finalScore > curBest) { curBest = finalScore; localStorage.setItem("dodgeDropBest", String(curBest)); bestEl.textContent = curBest; }
-    var lvl = LEVELS[Math.min(levelIndex, LEVELS.length - 1)];
-    var flower = FLOWER_TYPES[lvl.flowerIdx];
-    petalTimer = PETAL_DURATION; petals = []; spawnPetals(60);
-    actionBtn.style.display = "none";
-    btnGroup.classList.add("hidden");
+  function onLvlDone(){
+    st="flower";cancelAnimationFrame(aid);timerBar.style.width="0%";
+    if(cl.indexOf(li)===-1){cl.push(li);save()}
+    var fs=sc;if(fs>cb){cb=fs;localStorage.setItem("ddBest",String(cb));bestEl.textContent=cb}
+    var l=LEVELS[Math.min(li,LEVELS.length-1)];var f=FLOWER_TYPES[l.fi];peTi=PD;pe=[];spwPe(60);
+    actionBtn.style.display="none";btnGroup.classList.add("hidden");
     overlay.classList.remove("hidden");
-    overlayTitle.textContent = "第" + (levelIndex + 1) + "关 · 通关！";
-    overlaySub.innerHTML = '<span style="font-size:14px;color:var(--foreground);">' + flower.name + '</span><br><span class="text-small" style="color:var(--muted-foreground);">得分：' + finalScore + '</span>';
+    overlayTitle.textContent="第"+(li+1)+"关 · 通关！";
+    overlaySub.innerHTML='<span style="font-size:14px;color:var(--gold);">'+f.name+'</span><br><span style="font-size:12px;color:var(--muted-fg);">得分：'+fs+'</span>';
     loop(performance.now());
   }
 
-  function showLevelMap() {
-    state = "level-map";
-    cancelAnimationFrame(animId);
-    petals = [];
-    actionBtn.style.display = "";
-    btnGroup.classList.add("hidden");
-    overlay.classList.remove("hidden");
-    overlayTitle.textContent = "江湖路";
-    var html = '<div class="level-map"><div class="level-map-path">';
-    for (var i = 0; i < totalLevels; i++) {
-      var isCompleted = completedLevels.indexOf(i) !== -1;
-      var isCurrent = i === levelIndex;
-      var maxDone = completedLevels.length ? Math.max.apply(null, completedLevels) : -1;
-      var isUnlocked = isCompleted || i === 0 || completedLevels.indexOf(i - 1) !== -1 || i <= maxDone + 1;
-      var cls = "level-map-node";
-      if (isCompleted) cls += " completed"; else if (isCurrent) cls += " current"; else if (isUnlocked) cls += " unlocked"; else cls += " locked";
-      var lvl = LEVELS[i];
-      var flower = FLOWER_TYPES[lvl.flowerIdx];
-      var checkHtml = isCompleted ? '<span class="check-mark"><svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg></span>' : '';
-      html += '<div class="level-map-row">';
-      html += '<button class="' + cls + '" data-level="' + i + '" ' + (isUnlocked ? '' : 'disabled') + '>' + (i + 1) + checkHtml + '</button>';
-      html += '<span style="font-size:11px;color:var(--muted-foreground);text-align:left;flex:1;">' + flower.name + '</span>';
-      html += '</div>';
-      if (i < totalLevels - 1) {
-        var connCls = isCompleted ? "level-map-connector done" : (isUnlocked ? "level-map-connector partial" : "level-map-connector");
-        html += '<div class="' + connCls + '"></div>';
-      }
+  function showMap(){
+    st="map";cancelAnimationFrame(aid);pe=[];
+    actionBtn.style.display="";btnGroup.classList.add("hidden");
+    overlay.classList.remove("hidden");overlayTitle.textContent="江湖路";
+    var h='<div class="level-map"><div class="level-map-path">';
+    for(var i=0;i<tl;i++){
+      var ic=cl.indexOf(i)!==-1;var icr=i===li;
+      var md=cl.length?Math.max.apply(null,cl):-1;var iu=ic||i===0||cl.indexOf(i-1)!==-1||i<=md+1;
+      var cls="level-map-node";if(ic)cls+=" completed";else if(icr)cls+=" current";else if(iu)cls+=" unlocked";else cls+=" locked";
+      var lv=LEVELS[i];var f=FLOWER_TYPES[lv.fi];
+      var ch=ic?'<span class="check-mark"><svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg></span>':'';
+      h+='<div class="level-map-row">';
+      h+='<button class="'+cls+'" data-lvl="'+i+'" '+(iu?'':'disabled')+'>'+(i+1)+ch+'</button>';
+      h+='<span style="font-size:11px;color:var(--muted-fg);text-align:left;flex:1;">'+f.name+'</span>';
+      h+='</div>';
+      if(i<tl-1){var cc=ic?"level-map-connector done":(iu?"level-map-connector partial":"level-map-connector");h+='<div class="'+cc+'"></div>'}
     }
-    html += '</div></div>';
-    overlaySub.innerHTML = html;
-    var nextIdx = levelIndex + 1;
-    if (nextIdx < totalLevels && (completedLevels.indexOf(nextIdx) !== -1 || completedLevels.indexOf(levelIndex) !== -1)) {
-      actionBtn.textContent = "第" + (nextIdx + 1) + "关";
-      actionBtn.dataset.targetLevel = nextIdx;
-    } else {
-      actionBtn.textContent = "第" + (levelIndex + 1) + "关（重玩）";
-      actionBtn.dataset.targetLevel = levelIndex;
-    }
-    requestAnimationFrame(function() {
-      var nodes = overlaySub.querySelectorAll(".level-map-node.unlocked, .level-map-node.completed, .level-map-node.current");
-      for (var i = 0; i < nodes.length; i++) {
-        (function(btn) {
-          btn.addEventListener("click", function() {
-            var lvl = parseInt(btn.dataset.level, 10);
-            if (!isNaN(lvl) && lvl >= 0 && lvl < totalLevels) startLevel(lvl);
-          });
-        })(nodes[i]);
-      }
-      var st = overlaySub.querySelector(".level-map-node.current") || overlaySub.querySelector(".level-map-node.completed:last-child");
-      if (st) st.scrollIntoView({ block: "center", behavior: "smooth" });
-    });
+    h+='</div></div>';overlaySub.innerHTML=h;
+    var ni=li+1;
+    if(ni<tl&&(cl.indexOf(ni)!==-1||cl.indexOf(li)!==-1)){actionBtn.textContent="第"+(ni+1)+"关";actionBtn.dataset.tgt=ni}
+    else{actionBtn.textContent="第"+(li+1)+"关（重玩）";actionBtn.dataset.tgt=li}
+    requestAnimationFrame(function(){
+      var nd=overlaySub.querySelectorAll(".level-map-node.unlocked,.level-map-node.completed,.level-map-node.current");
+      for(var i=0;i<nd.length;i++){(function(b){b.addEventListener("click",function(){var l=parseInt(b.dataset.lvl,10);if(!isNaN(l)&&l>=0&&l<tl)startLevel(l,true)})})(nd[i])}
+      var st=overlaySub.querySelector(".level-map-node.current")||overlaySub.querySelector(".level-map-node.completed:last-child");
+      if(st)st.scrollIntoView({block:"center",behavior:"smooth"})
+    })
   }
 
-  function onGameOver() {
-    state = "gameover";
-    cancelAnimationFrame(animId);
-    timerBar.style.width = "0%";
-    var isNewBest = score > curBest;
-    if (isNewBest) { curBest = score; localStorage.setItem("dodgeDropBest", String(curBest)); bestEl.textContent = curBest; }
-    overlay.classList.remove("hidden");
-    overlayTitle.textContent = "败阵";
-    overlaySub.innerHTML = "第" + (levelIndex + 1) + "关 · 得分 <span class="final-score">" + score + "</span>" + (isNewBest ? "<br><span class="new-best">✦ 新纪录 ✦</span>" : "");
-    if (levelIndex === 0) {
-      actionBtn.style.display = ""; actionBtn.textContent = "重试"; actionBtn.dataset.targetLevel = levelIndex;
-      btnGroup.classList.add("hidden");
-    } else {
-      actionBtn.style.display = "none";
-      btnGroup.classList.remove("hidden");
-      retryBtn.dataset.targetLevel = levelIndex;
-      mapBtn.dataset.targetLevel = levelIndex;
-    }
+  function onGO(){
+    st="go";cancelAnimationFrame(aid);timerBar.style.width="0%";
+    var nb=sc>cb;if(nb){cb=sc;localStorage.setItem("ddBest",String(cb));bestEl.textContent=cb}
+    overlay.classList.remove("hidden");overlayTitle.textContent="败阵";
+    overlaySub.innerHTML="第"+(li+1)+"关 · 得分 <span class=\"final-score\">"+sc+"</span>"+(nb?"<br><span class=\"new-best\">✦ 新纪录 ✦</span>":"");
+    if(li===0){actionBtn.style.display="";actionBtn.textContent="重试";actionBtn.dataset.tgt=li;btnGroup.classList.add("hidden")}
+    else{actionBtn.style.display="none";btnGroup.classList.remove("hidden");retryBtn.dataset.tgt=li;mapBtn.dataset.tgt=li}
   }
 
-  function startLevel(idx) {
-    initLevel(idx);
-    actionBtn.style.display = "";
-    actionBtn.textContent = "";
-    btnGroup.classList.add("hidden");
-    canvas.focus();
-    loop(performance.now());
+  var lt=0;
+  function loop(t){
+    if(st==="map"||st==="go"||st==="menu"||st==="intro")return;
+    var dt=Math.min(t-lt,50);lt=t;upd(dt);
+    if(st==="playing"||st==="flower"){draw();aid=requestAnimationFrame(loop)}
   }
 
-  var lastTime = 0;
-  function loop(time) {
-    if (state === "level-map" || state === "gameover" || state === "menu") return;
-    var dt = Math.min(time - lastTime, 50);
-    lastTime = time;
-    update(dt);
-    if (state === "playing" || state === "flower-shower") { draw(); animId = requestAnimationFrame(loop); }
+  function showMenu(){
+    st="menu";cancelAnimationFrame(aid);timerBar.style.width="100%";
+    actionBtn.style.display="";actionBtn.textContent="开始闯关";actionBtn.dataset.tgt="0";
+    btnGroup.classList.add("hidden");overlay.classList.remove("hidden");
+    overlayTitle.textContent="花雨落";
+    overlaySub.innerHTML="每关十五息，落块如飞雨<br>十大险关，步步惊心";
+    levelDisplay.textContent="1";ctx.clearRect(0,0,W,H);
+    levelIntro.classList.remove("show");
   }
 
-  function showMenu() {
-    state = "menu";
-    cancelAnimationFrame(animId);
-    timerBar.style.width = "100%";
-    actionBtn.style.display = ""; actionBtn.textContent = "开始闯关"; actionBtn.dataset.targetLevel = "0";
-    btnGroup.classList.add("hidden");
-    overlay.classList.remove("hidden");
-    overlayTitle.textContent = "花雨落";
-    overlaySub.innerHTML = "每关15秒，躲避落块，步步惊心<br>十大险关等你来闯";
-    levelDisplay.textContent = "1";
-    ctx.clearRect(0, 0, W, H);
+  document.addEventListener("keydown",function(e){ke[e.code]=true;if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Space"].indexOf(e.code)!==-1)e.preventDefault()})
+  document.addEventListener("keyup",function(e){ke[e.code]=false})
+
+  var pid=null;
+  function hp(clientX){
+    if(st!=="playing")return;
+    var r=canvas.getBoundingClientRect();var sx=W/r.width;var rx=(clientX-r.left)*sx;
+    if(rx>=0&&rx<=W)pl.x=Math.max(pl.r,Math.min(W-pl.r,rx))
   }
+  canvas.addEventListener("mousedown",function(e){hp(e.clientX,e.clientY)})
+  canvas.addEventListener("mousemove",function(e){if(e.buttons>0)hp(e.clientX,e.clientY)})
 
-  document.addEventListener("keydown", function(e) {
-    keys[e.code] = true;
-    if (["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Space"].indexOf(e.code) !== -1) e.preventDefault();
-  });
-  document.addEventListener("keyup", function(e) { keys[e.code] = false; });
-
-  var pointerId = null;
-  function handlePointer(clientX, clientY) {
-    if (state !== "playing") return;
-    var rect = canvas.getBoundingClientRect();
-    var scaleX = W / rect.width;
-    var relX = (clientX - rect.left) * scaleX;
-    if (relX >= 0 && relX <= W) {
-      player.x = Math.max(player.r, Math.min(W - player.r, relX));
-    }
-  }
-
-  canvas.addEventListener("mousedown", function(e) { handlePointer(e.clientX, e.clientY); });
-  canvas.addEventListener("mousemove", function(e) { if (e.buttons > 0) handlePointer(e.clientX, e.clientY); });
-
-  canvas.addEventListener("touchstart", function(e) {
+  canvas.addEventListener("touchstart",function(e){
+    e.preventDefault();var t=e.touches[0];pid=t.identifier;hp(t.clientX,t.clientY)
+  },{passive:false});
+  canvas.addEventListener("touchmove",function(e){
     e.preventDefault();
-    var t = e.touches[0];
-    pointerId = t.identifier;
-    handlePointer(t.clientX, t.clientY);
-  }, { passive: false });
-
-  canvas.addEventListener("touchmove", function(e) {
-    e.preventDefault();
-    for (var i = 0; i < e.touches.length; i++) {
-      if (pointerId === null || e.touches[i].identifier === pointerId) {
-        handlePointer(e.touches[i].clientX, e.touches[i].clientY);
-        pointerId = e.touches[i].identifier;
-        break;
-      }
+    for(var i=0;i<e.touches.length;i++){
+      if(pid===null||e.touches[i].identifier===pid){hp(e.touches[i].clientX,e.touches[i].clientY);pid=e.touches[i].identifier;break}
     }
-  }, { passive: false });
+  },{passive:false});
+  canvas.addEventListener("touchend",function(){pid=null},{passive:true})
+  canvas.addEventListener("touchcancel",function(){pid=null},{passive:true})
 
-  canvas.addEventListener("touchend", function(e) { pointerId = null; }, { passive: true });
-  canvas.addEventListener("touchcancel", function() { pointerId = null; }, { passive: true });
+  actionBtn.addEventListener("click",function(){
+    var t=parseInt(actionBtn.dataset.tgt,10);
+    if(!isNaN(t)&&t>=0&&t<tl)startLevel(t,true);else showMenu()
+  })
+  retryBtn.addEventListener("click",function(){var t=parseInt(retryBtn.dataset.tgt,10);if(!isNaN(t))startLevel(t,false)})
+  mapBtn.addEventListener("click",function(){showMap()})
 
-  actionBtn.addEventListener("click", function() {
-    var target = parseInt(actionBtn.dataset.targetLevel, 10);
-    if (!isNaN(target) && target >= 0 && target < totalLevels) startLevel(target); else showMenu();
-  });
-  retryBtn.addEventListener("click", function() {
-    var target = parseInt(retryBtn.dataset.targetLevel, 10);
-    if (!isNaN(target)) startLevel(target);
-  });
-  mapBtn.addEventListener("click", function() { showLevelMap(); });
-
-  showMenu();
+  showMenu()
 })();
 </script>
 </body>
