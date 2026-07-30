@@ -345,7 +345,7 @@
     btnGroup.classList.add("hidden");overlay.classList.remove("hidden");
     overlayTitle.textContent="花雨落";
     overlaySub.innerHTML="每关十五息，落块如飞雨<br>十大险关，步步惊心";
-    levelDisplay.textContent="1";ctx.clearRect(0,0,W,H);
+    levelDisplay.textContent="1";ctx.clearRect(0,0,W,H);ctx.fillStyle="rgba(200,168,124,0.06)";ctx.font="16px serif";ctx.textAlign="center";ctx.fillText("✦",200,230);
     levelIntro.classList.remove("show");
   }
 
@@ -375,7 +375,11 @@
 
   actionBtn.addEventListener("click",function(){
     var t=parseInt(actionBtn.dataset.tgt,10);
-    if(!isNaN(t)&&t>=0&&t<tl)startLevel(t,true);else showMenu()
+    if(!isNaN(t)&&t>=0&&t<tl){
+      overlay.classList.add("hidden");
+      initLvl(t);
+      loop(performance.now());
+    }else{showMenu()}
   })
   retryBtn.addEventListener("click",function(){var t=parseInt(retryBtn.dataset.tgt,10);if(!isNaN(t))startLevel(t,false)})
   mapBtn.addEventListener("click",function(){showMap()})
