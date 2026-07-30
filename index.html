@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>花雨落</title>
+<style>
+  *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --background: #0f0f23;
+    --foreground: #e0e0e0;
+    --card: #16162e;
+    --card-foreground: #e0e0e0;
+    --primary: #4fc3f7;
+    --primary-foreground: #0a0a1a;
+    --muted: #2a2a4a;
+    --muted-foreground: #999;
+    --border: #2a2a4a;
+    --ring: #4fc3f7;
+    --viz-series-1: #4fc3f7;
+    --viz-series-2: #ff8a65;
+    --viz-series-3: #81c784;
+    --viz-series-4: #ffd54f;
+    --viz-series-5: #ce93d8;
+    --viz-series-6: #ef5350;
+    --destructive: #ef5350;
+  }
+  html, body {
+    height: 100%;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: "PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",ui-monospace,monospace;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    touch-action: none;
+    overscroll-behavior: none;
+    overflow: hidden;
+  }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100dvh;
+    padding: 8px;
+  }
+  #game-root {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+    -webkit-user-select: none;
+    width: 100%;
+    max-width: 400px;
+    font-family: "PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",ui-monospace,monospace;
+    touch-action: none;
+  }
+  #game-root .game-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 4px;
+    width: 100%;
+  }
+  #game-root .header-group { display: flex; align-items: center; gap: 6px; }
+  #game-root .header-group.header-right { margin-left: auto; }
+  #game-root .score-label { font-size: 11px; letter-spacing: 1.5px; color: var(--muted-foreground); }
+  #game-root .score-value { font-size: 20px; font-weight: 500; color: var(--foreground); min-width: 32px; text-align: right; }
+  #game-canvas-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 400 / 460;
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+  }
+  #timer-bar-wrapper {
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  #timer-bar {
+    height: 100%;
+    background: var(--viz-series-1);
+    border-radius: 2px;
+    transition: width 0.1s linear;
+  }
+  #game-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: var(--card);
+    outline: none;
+    cursor: default;
+    touch-action: none;
+  }
+  #game-canvas:focus-visible { box-shadow: 0 0 0 2px var(--ring); }
+  #game-root .overlay {
+    position: absolute;
+    inset: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--card) 88%, transparent);
+    border-radius: 0 0 8px 8px;
+    transition: opacity 0.25s;
+  }
+  #game-root .overlay.hidden { opacity: 0; pointer-events: none; }
+  #game-root .overlay-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+    padding: 20px;
+    width: 100%;
+    max-width: 320px;
+  }
+  #game-root .overlay-title { font-size: 28px; font-weight: 500; letter-spacing: 4px; margin: 0; color: var(--foreground); }
+  #game-root .overlay-sub { margin: 0; font-size: 13px; color: var(--muted-foreground); line-height: 1.5; }
+  #game-root .overlay-btn {
+    font-family: inherit;
+    font-size: 15px;
+    letter-spacing: 1px;
+    padding: 10px 28px;
+    margin-top: 2px;
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    background: var(--primary);
+    color: var(--primary-foreground);
+    transition: opacity 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  #game-root .overlay-btn:active { opacity: 0.7; }
+  #game-root .btn-group { display: flex; gap: 10px; margin-top: 4px; }
+  #game-root .btn-group.hidden { display: none; }
+  #game-root .controls-hint { display: flex; align-items: center; gap: 6px; color: var(--muted-foreground); margin-top: 2px; }
+  #game-root .controls-hint kbd {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 22px; height: 22px; padding: 0 6px;
+    font-family: inherit; font-size: 12px;
+    border: 1px solid var(--border); border-radius: 4px;
+    background: var(--background); color: var(--foreground);
+  }
+  #game-root .controls-hint svg { width: 16px; height: 16px; opacity: 0.6; }
+  #game-root .final-score { font-size: 32px; font-weight: 500; color: var(--viz-series-1); }
+  #game-root .new-best { font-size: 11px; letter-spacing: 2px; color: var(--viz-series-1); animation: pulse-bright 0.6s ease-in-out infinite alternate; }
+  @keyframes pulse-bright { from { opacity: 0.6; } to { opacity: 1; } }
+  #game-root .level-map { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px; width: 100%; max-height: 420px; overflow-y: auto; }
+  #game-root .level-map-title { font-size: 16px; font-weight: 500; letter-spacing: 2px; margin: 0 0 6px 0; color: var(--foreground); }
+  #game-root .level-map-path { display: flex; flex-direction: column; align-items: center; gap: 0; width: 100%; padding: 0 8px; }
+  #game-root .level-map-row { display: flex; align-items: center; gap: 12px; width: 100%; justify-content: center; }
+  #game-root .level-map-node {
+    width: 44px; height: 44px; min-width: 44px;
+    border-radius: 50%; border: 2px solid var(--border);
+    background: var(--background); color: var(--muted-foreground);
+    font-family: inherit; font-size: 14px; font-weight: 500;
+    cursor: default; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; position: relative; flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  #game-root .level-map-node.completed { border-color: var(--viz-series-1); background: color-mix(in srgb, var(--viz-series-1) 15%, transparent); color: var(--viz-series-1); }
+  #game-root .level-map-node.current { border-color: var(--primary); background: var(--primary); color: var(--primary-foreground); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent); animation: node-pulse 1.5s ease-in-out infinite; }
+  #game-root .level-map-node.unlocked { border-color: var(--border); color: var(--foreground); cursor: pointer; }
+  #game-root .level-map-node.unlocked:hover { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, transparent); }
+  #game-root .level-map-node.locked { opacity: 0.35; cursor: default; }
+  #game-root .level-map-node .check-mark { position: absolute; top: -4px; right: -4px; width: 16px; height: 16px; background: var(--viz-series-1); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  #game-root .level-map-node .check-mark svg { width: 10px; height: 10px; stroke: white; stroke-width: 3; }
+  #game-root .level-map-connector { width: 2px; height: 18px; background: var(--border); margin: 0 auto; flex-shrink: 0; }
+  #game-root .level-map-connector.done { background: var(--viz-series-1); }
+  #game-root .level-map-connector.partial { background: linear-gradient(to bottom, var(--viz-series-1) 50%, var(--border) 50%); }
+  @keyframes node-pulse { 0%,100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 30%, transparent); } 50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--primary) 20%, transparent); } }
+  @media (max-width: 420px) {
+    body { padding: 4px; }
+    #game-root .overlay-content { padding: 12px; gap: 8px; }
+    #game-root .overlay-title { font-size: 24px; }
+    #game-root .score-value { font-size: 17px; min-width: 28px; }
+    #game-root .score-label { font-size: 10px; }
+    #game-root .level-map-node { width: 38px; height: 38px; min-width: 38px; font-size: 12px; }
+    #game-root .level-map-connector { height: 14px; }
+    #game-root .level-map { max-height: 360px; }
+  }
+  @media (max-width: 360px) {
+    #game-root .overlay-title { font-size: 20px; }
+    #game-root .overlay-btn { font-size: 13px; padding: 8px 20px; }
+    #game-root .level-map-node { width: 32px; height: 32px; min-width: 32px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<div id="game-root">
+  <div class="game-header">
+    <span class="header-group"><span class="score-label">得分</span><span id="score" class="score-value">0</span></span>
+    <span class="header-group"><span class="score-label">关卡</span><span id="level-display" class="score-value">1</span></span>
+    <span class="header-group header-right"><span class="score-label">最高</span><span id="best" class="score-value">0</span></span>
+  </div>
+  <div id="timer-bar-wrapper"><div id="timer-bar" style="width:100%"></div></div>
+  <div id="game-canvas-wrapper">
+    <canvas id="game-canvas" width="400" height="460" tabindex="0" role="img" aria-label="花雨落游戏，滑动或拖拽移动小球躲避方块，每关15秒。"></canvas>
+    <div id="overlay" class="overlay">
+      <div id="overlay-content" class="overlay-content">
+        <h2 id="overlay-title" class="overlay-title">花雨落</h2>
+        <p id="overlay-sub" class="overlay-sub">每关15秒，躲避落块，步步惊心<br>十大险关等你来闯</p>
+        <button id="action-btn" class="overlay-btn">开始闯关</button>
+        <div id="btn-group" class="btn-group hidden">
+          <button id="retry-btn" class="overlay-btn" style="background:var(--primary);color:var(--primary-foreground);">重试本关</button>
+          <button id="map-btn" class="overlay-btn" style="background:var(--card);color:var(--foreground);border:1px solid var(--border);">闯关地图</button>
+        </div>
+        <div class="controls-hint">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          <span class="text-small">或</span>
+          <span class="text-small"><kbd>A</kbd> <kbd>D</kbd></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var root = document.getElementById("game-root");
+  var canvas = document.getElementById("game-canvas");
+  var ctx = canvas.getContext("2d");
+  var overlay = document.getElementById("overlay");
+  var overlayTitle = document.getElementById("overlay-title");
+  var overlaySub = document.getElementById("overlay-sub");
+  var actionBtn = document.getElementById("action-btn");
+  var retryBtn = document.getElementById("retry-btn");
+  var mapBtn = document.getElementById("map-btn");
+  var btnGroup = document.getElementById("btn-group");
+  var scoreEl = document.getElementById("score");
+  var bestEl = document.getElementById("best");
+  var levelDisplay = document.getElementById("level-display");
+  var timerBar = document.getElementById("timer-bar");
+
+  var W = 400, H = 460, P_SIZE = 22, B_SIZE = 20;
+  var LEVEL_TIME = 15, PETAL_DURATION = 4000;
+
+  var FLOWER_TYPES = [
+    { name: "茉莉花", color: "#f5ece0", center: "#e8d4a0", size: 5 },
+    { name: "樱花", color: "#ffb7c5", center: "#ff8fa3", size: 5 },
+    { name: "梅花", color: "#e63946", center: "#c1121f", size: 4 },
+    { name: "桃花", color: "#ffc8dd", center: "#ffafcc", size: 5 },
+    { name: "薰衣草", color: "#b39ddb", center: "#7c4dff", size: 4 },
+    { name: "向日葵", color: "#ffd54f", center: "#5d4037", size: 6 },
+    { name: "荷花", color: "#f8bbd0", center: "#f06292", size: 6 },
+    { name: "桂花", color: "#ffe082", center: "#ff8f00", size: 3 },
+    { name: "菊花", color: "#ce93d8", center: "#8e24aa", size: 5 },
+    { name: "玫瑰花", color: "#e91e63", center: "#880e4f", size: 5 },
+  ];
+
+  var LEVELS = [
+    { speed: 0.7, interval: 950, flowerIdx: 0 },
+    { speed: 0.9, interval: 880, flowerIdx: 1 },
+    { speed: 1.1, interval: 820, flowerIdx: 2 },
+    { speed: 1.3, interval: 760, flowerIdx: 3 },
+    { speed: 1.6, interval: 700, flowerIdx: 4 },
+    { speed: 1.9, interval: 640, flowerIdx: 5 },
+    { speed: 2.2, interval: 580, flowerIdx: 6 },
+    { speed: 2.6, interval: 520, flowerIdx: 7 },
+    { speed: 3.0, interval: 460, flowerIdx: 8 },
+    { speed: 3.5, interval: 400, flowerIdx: 9 },
+  ];
+
+  var player, blocks, particles, petals, score, state, animId;
+  var spawnTimer, difficultyTimer, levelTimer, levelIndex;
+  var keys = {};
+  var totalLevels = LEVELS.length;
+  var completedLevels = [];
+  var petalTimer = 0;
+
+  var curBest = parseInt(localStorage.getItem("dodgeDropBest") || "0", 10);
+  var savedProgress = (localStorage.getItem("dodgeDropProgress") || "").split(",").filter(Boolean).map(Number);
+  completedLevels = savedProgress;
+  bestEl.textContent = curBest;
+
+  function getColors() {
+    var s = getComputedStyle(root);
+    return {
+      fg: s.getPropertyValue("--foreground").trim(),
+      muted: s.getPropertyValue("--muted-foreground").trim(),
+      card: s.getPropertyValue("--card").trim(),
+      bg: s.getPropertyValue("--background").trim(),
+      border: s.getPropertyValue("--border").trim(),
+      series1: s.getPropertyValue("--viz-series-1").trim(),
+      series2: s.getPropertyValue("--viz-series-2").trim(),
+      series3: s.getPropertyValue("--viz-series-3").trim(),
+      destructive: s.getPropertyValue("--destructive").trim(),
+      primary: s.getPropertyValue("--primary").trim(),
+    };
+  }
+
+  function saveProgress() {
+    localStorage.setItem("dodgeDropProgress", completedLevels.join(","));
+  }
+
+  function drawRoundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  function drawPetal(ctx, x, y, size, angle, color, alpha) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.ellipse(size * 0.15, -size * 0.5, size * 0.25, size * 0.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = color;
+    ctx.globalAlpha = alpha * 0.25;
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.moveTo(size * 0.15, -size * 0.05);
+    ctx.lineTo(size * 0.15, -size * 0.9);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function initLevel(idx) {
+    levelIndex = idx;
+    player = { x: W / 2, y: H - 36, r: P_SIZE / 2 };
+    blocks = []; particles = []; petals = [];
+    score = 0; spawnTimer = 0; difficultyTimer = 0;
+    levelTimer = LEVEL_TIME * 1000; petalTimer = 0;
+    scoreEl.textContent = "0";
+    levelDisplay.textContent = idx + 1;
+    actionBtn.style.display = "";
+    btnGroup.classList.add("hidden");
+    overlay.classList.add("hidden");
+    state = "playing";
+  }
+
+  function spawnBlock() {
+    var c = getColors();
+    var lvl = LEVELS[Math.min(levelIndex, LEVELS.length - 1)];
+    var w = B_SIZE + Math.random() * 16;
+    var h = B_SIZE + Math.random() * 16;
+    var x = Math.random() * (W - w - 10) + 5;
+    var speed = lvl.speed + Math.random() * lvl.speed * 0.8 + score * 0.002;
+    var colors = [c.series1, c.series2, c.series3, c.destructive, c.muted];
+    var color = colors[Math.floor(Math.random() * colors.length)] || c.series1;
+    blocks.push({ x: x, y: -h, w: w, h: h, speed: Math.min(speed, 6.5), color: color, rot: Math.random() * Math.PI * 2, rotSpeed: (Math.random() - 0.5) * 0.05 });
+  }
+
+  function spawnParticles(x, y, color, count) {
+    for (var i = 0; i < count; i++) {
+      var angle = Math.random() * Math.PI * 2;
+      var spd = 1 + Math.random() * 3;
+      particles.push({ x: x, y: y, vx: Math.cos(angle) * spd, vy: Math.sin(angle) * spd, life: 1, decay: 0.015 + Math.random() * 0.025, size: 2 + Math.random() * 4, color: color });
+    }
+  }
+
+  function spawnPetals(count) {
+    var lvl = LEVELS[Math.min(levelIndex, LEVELS.length - 1)];
+    var flower = FLOWER_TYPES[lvl.flowerIdx];
+    for (var i = 0; i < count; i++) {
+      petals.push({
+        x: Math.random() * (W + 40) - 20,
+        y: Math.random() * H * -0.5 - 10,
+        size: flower.size * (0.5 + Math.random() * 0.8),
+        angle: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 0.06,
+        vx: (Math.random() - 0.5) * 0.8,
+        vy: 0.3 + Math.random() * 0.8,
+        sway: Math.random() * 0.03,
+        swayOffset: Math.random() * Math.PI * 2,
+        color: flower.color,
+        alpha: 0.6 + Math.random() * 0.4,
+      });
+    }
+  }
+
+  function update(dt) {
+    if (state === "playing") {
+      var moveSpeed = 300;
+      var dx = 0;
+      if (keys["ArrowLeft"] || keys["KeyA"]) dx = -1;
+      if (keys["ArrowRight"] || keys["KeyD"]) dx = 1;
+      player.x += dx * moveSpeed * (dt / 1000);
+      player.x = Math.max(player.r, Math.min(W - player.r, player.x));
+
+      levelTimer -= dt;
+      var pct = Math.max(0, levelTimer / (LEVEL_TIME * 1000));
+      timerBar.style.width = (pct * 100) + "%";
+
+      if (levelTimer <= 0) {
+        score = Math.max(score, 1);
+        scoreEl.textContent = score;
+        onLevelComplete();
+        return;
+      }
+
+      difficultyTimer += dt;
+      if (difficultyTimer > 1000) {
+        score++;
+        scoreEl.textContent = score;
+        difficultyTimer = 0;
+      }
+
+      var lvl = LEVELS[Math.min(levelIndex, LEVELS.length - 1)];
+      spawnTimer += dt;
+      if (spawnTimer >= lvl.interval) {
+        var count = Math.floor(spawnTimer / lvl.interval);
+        for (var i = 0; i < Math.min(count, 3); i++) spawnBlock();
+        spawnTimer = spawnTimer % lvl.interval;
+      }
+
+      for (var i = blocks.length - 1; i >= 0; i--) {
+        var b = blocks[i];
+        b.y += b.speed;
+        b.rot += b.rotSpeed;
+        var cx = Math.max(b.x, Math.min(player.x, b.x + b.w));
+        var cy = Math.max(b.y, Math.min(player.y, b.y + b.h));
+        var ddx = player.x - cx;
+        var ddy = player.y - cy;
+        if (ddx * ddx + ddy * ddy < player.r * player.r) {
+          spawnParticles(player.x, player.y, getColors().destructive, 25);
+          onGameOver();
+          return;
+        }
+        if (b.y > H + b.h) blocks.splice(i, 1);
+      }
+
+      for (var i = particles.length - 1; i >= 0; i--) {
+        var p = particles[i];
+        p.x += p.vx; p.y += p.vy;
+        p.vy += 0.05;
+        p.life -= p.decay;
+        if (p.life <= 0) particles.splice(i, 1);
+      }
+    }
+
+    if (state === "flower-shower") {
+      petalTimer -= dt;
+      if (petalTimer > 0 && petals.length < 80) { spawnPetals(3); }
+      for (var i = petals.length - 1; i >= 0; i--) {
+        var p = petals[i];
+        p.x += p.vx + Math.sin(p.swayOffset + performance.now() * p.sway) * 0.5;
+        p.y += p.vy;
+        p.angle += p.rotSpeed;
+        if (p.y > H + 20) petals.splice(i, 1);
+      }
+      if (petalTimer <= 0 && petals.length === 0) showLevelMap();
+    }
+  }
+
+  function draw() {
+    var c = getColors();
+    ctx.clearRect(0, 0, W, H);
+
+    ctx.strokeStyle = c.border;
+    ctx.lineWidth = 0.5;
+    ctx.globalAlpha = 0.1;
+    for (var x = 0; x <= W; x += 30) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+    for (var y = 0; y <= H; y += 30) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+    ctx.globalAlpha = 1;
+
+    for (var i = 0; i < blocks.length; i++) {
+      var b = blocks[i];
+      ctx.save();
+      ctx.translate(b.x + b.w / 2, b.y + b.h / 2);
+      ctx.rotate(b.rot);
+      ctx.fillStyle = b.color;
+      ctx.globalAlpha = 0.75;
+      drawRoundRect(ctx, -b.w/2, -b.h/2, b.w, b.h, 4);
+      ctx.fill();
+      ctx.globalAlpha = 0.3;
+      ctx.strokeStyle = c.border;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      ctx.globalAlpha = p.life;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    if (state === "playing") {
+      var px = player.x, py = player.y, pr = player.r;
+      var grad = ctx.createRadialGradient(px, py, 0, px, py, pr * 2.5);
+      var baseCol = c.series1;
+      var rgba = baseCol.replace("rgb(", "rgba(").replace(")", ", 0.2)");
+      grad.addColorStop(0, rgba.indexOf("rgba") !== -1 ? rgba : "rgba(100,100,255,0.2)");
+      grad.addColorStop(1, "transparent");
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(px, py, pr * 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = c.series1;
+      ctx.globalAlpha = 0.9;
+      ctx.beginPath();
+      ctx.arc(px, py, pr, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = c.card;
+      ctx.globalAlpha = 0.35;
+      ctx.beginPath();
+      ctx.arc(px - pr * 0.25, py - pr * 0.25, pr * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    if (state === "flower-shower") {
+      for (var i = 0; i < petals.length; i++) {
+        var p = petals[i];
+        drawPetal(ctx, p.x, p.y, p.size, p.angle, p.color, p.alpha);
+      }
+    }
+  }
+
+  function onLevelComplete() {
+    state = "flower-shower";
+    cancelAnimationFrame(animId);
+    timerBar.style.width = "0%";
+    if (completedLevels.indexOf(levelIndex) === -1) { completedLevels.push(levelIndex); saveProgress(); }
+    var finalScore = score;
+    if (finalScore > curBest) { curBest = finalScore; localStorage.setItem("dodgeDropBest", String(curBest)); bestEl.textContent = curBest; }
+    var lvl = LEVELS[Math.min(levelIndex, LEVELS.length - 1)];
+    var flower = FLOWER_TYPES[lvl.flowerIdx];
+    petalTimer = PETAL_DURATION; petals = []; spawnPetals(60);
+    actionBtn.style.display = "none";
+    btnGroup.classList.add("hidden");
+    overlay.classList.remove("hidden");
+    overlayTitle.textContent = "第" + (levelIndex + 1) + "关 · 通关！";
+    overlaySub.innerHTML = '<span style="font-size:14px;color:var(--foreground);">' + flower.name + '</span><br><span class="text-small" style="color:var(--muted-foreground);">得分：' + finalScore + '</span>';
+    loop(performance.now());
+  }
+
+  function showLevelMap() {
+    state = "level-map";
+    cancelAnimationFrame(animId);
+    petals = [];
+    actionBtn.style.display = "";
+    btnGroup.classList.add("hidden");
+    overlay.classList.remove("hidden");
+    overlayTitle.textContent = "江湖路";
+    var html = '<div class="level-map"><div class="level-map-path">';
+    for (var i = 0; i < totalLevels; i++) {
+      var isCompleted = completedLevels.indexOf(i) !== -1;
+      var isCurrent = i === levelIndex;
+      var maxDone = completedLevels.length ? Math.max.apply(null, completedLevels) : -1;
+      var isUnlocked = isCompleted || i === 0 || completedLevels.indexOf(i - 1) !== -1 || i <= maxDone + 1;
+      var cls = "level-map-node";
+      if (isCompleted) cls += " completed"; else if (isCurrent) cls += " current"; else if (isUnlocked) cls += " unlocked"; else cls += " locked";
+      var lvl = LEVELS[i];
+      var flower = FLOWER_TYPES[lvl.flowerIdx];
+      var checkHtml = isCompleted ? '<span class="check-mark"><svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg></span>' : '';
+      html += '<div class="level-map-row">';
+      html += '<button class="' + cls + '" data-level="' + i + '" ' + (isUnlocked ? '' : 'disabled') + '>' + (i + 1) + checkHtml + '</button>';
+      html += '<span style="font-size:11px;color:var(--muted-foreground);text-align:left;flex:1;">' + flower.name + '</span>';
+      html += '</div>';
+      if (i < totalLevels - 1) {
+        var connCls = isCompleted ? "level-map-connector done" : (isUnlocked ? "level-map-connector partial" : "level-map-connector");
+        html += '<div class="' + connCls + '"></div>';
+      }
+    }
+    html += '</div></div>';
+    overlaySub.innerHTML = html;
+    var nextIdx = levelIndex + 1;
+    if (nextIdx < totalLevels && (completedLevels.indexOf(nextIdx) !== -1 || completedLevels.indexOf(levelIndex) !== -1)) {
+      actionBtn.textContent = "第" + (nextIdx + 1) + "关";
+      actionBtn.dataset.targetLevel = nextIdx;
+    } else {
+      actionBtn.textContent = "第" + (levelIndex + 1) + "关（重玩）";
+      actionBtn.dataset.targetLevel = levelIndex;
+    }
+    requestAnimationFrame(function() {
+      var nodes = overlaySub.querySelectorAll(".level-map-node.unlocked, .level-map-node.completed, .level-map-node.current");
+      for (var i = 0; i < nodes.length; i++) {
+        (function(btn) {
+          btn.addEventListener("click", function() {
+            var lvl = parseInt(btn.dataset.level, 10);
+            if (!isNaN(lvl) && lvl >= 0 && lvl < totalLevels) startLevel(lvl);
+          });
+        })(nodes[i]);
+      }
+      var st = overlaySub.querySelector(".level-map-node.current") || overlaySub.querySelector(".level-map-node.completed:last-child");
+      if (st) st.scrollIntoView({ block: "center", behavior: "smooth" });
+    });
+  }
+
+  function onGameOver() {
+    state = "gameover";
+    cancelAnimationFrame(animId);
+    timerBar.style.width = "0%";
+    var isNewBest = score > curBest;
+    if (isNewBest) { curBest = score; localStorage.setItem("dodgeDropBest", String(curBest)); bestEl.textContent = curBest; }
+    overlay.classList.remove("hidden");
+    overlayTitle.textContent = "败阵";
+    overlaySub.innerHTML = "第" + (levelIndex + 1) + "关 · 得分 <span class="final-score">" + score + "</span>" + (isNewBest ? "<br><span class="new-best">✦ 新纪录 ✦</span>" : "");
+    if (levelIndex === 0) {
+      actionBtn.style.display = ""; actionBtn.textContent = "重试"; actionBtn.dataset.targetLevel = levelIndex;
+      btnGroup.classList.add("hidden");
+    } else {
+      actionBtn.style.display = "none";
+      btnGroup.classList.remove("hidden");
+      retryBtn.dataset.targetLevel = levelIndex;
+      mapBtn.dataset.targetLevel = levelIndex;
+    }
+  }
+
+  function startLevel(idx) {
+    initLevel(idx);
+    actionBtn.style.display = "";
+    actionBtn.textContent = "";
+    btnGroup.classList.add("hidden");
+    canvas.focus();
+    loop(performance.now());
+  }
+
+  var lastTime = 0;
+  function loop(time) {
+    if (state === "level-map" || state === "gameover" || state === "menu") return;
+    var dt = Math.min(time - lastTime, 50);
+    lastTime = time;
+    update(dt);
+    if (state === "playing" || state === "flower-shower") { draw(); animId = requestAnimationFrame(loop); }
+  }
+
+  function showMenu() {
+    state = "menu";
+    cancelAnimationFrame(animId);
+    timerBar.style.width = "100%";
+    actionBtn.style.display = ""; actionBtn.textContent = "开始闯关"; actionBtn.dataset.targetLevel = "0";
+    btnGroup.classList.add("hidden");
+    overlay.classList.remove("hidden");
+    overlayTitle.textContent = "花雨落";
+    overlaySub.innerHTML = "每关15秒，躲避落块，步步惊心<br>十大险关等你来闯";
+    levelDisplay.textContent = "1";
+    ctx.clearRect(0, 0, W, H);
+  }
+
+  document.addEventListener("keydown", function(e) {
+    keys[e.code] = true;
+    if (["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Space"].indexOf(e.code) !== -1) e.preventDefault();
+  });
+  document.addEventListener("keyup", function(e) { keys[e.code] = false; });
+
+  var pointerId = null;
+  function handlePointer(clientX, clientY) {
+    if (state !== "playing") return;
+    var rect = canvas.getBoundingClientRect();
+    var scaleX = W / rect.width;
+    var relX = (clientX - rect.left) * scaleX;
+    if (relX >= 0 && relX <= W) {
+      player.x = Math.max(player.r, Math.min(W - player.r, relX));
+    }
+  }
+
+  canvas.addEventListener("mousedown", function(e) { handlePointer(e.clientX, e.clientY); });
+  canvas.addEventListener("mousemove", function(e) { if (e.buttons > 0) handlePointer(e.clientX, e.clientY); });
+
+  canvas.addEventListener("touchstart", function(e) {
+    e.preventDefault();
+    var t = e.touches[0];
+    pointerId = t.identifier;
+    handlePointer(t.clientX, t.clientY);
+  }, { passive: false });
+
+  canvas.addEventListener("touchmove", function(e) {
+    e.preventDefault();
+    for (var i = 0; i < e.touches.length; i++) {
+      if (pointerId === null || e.touches[i].identifier === pointerId) {
+        handlePointer(e.touches[i].clientX, e.touches[i].clientY);
+        pointerId = e.touches[i].identifier;
+        break;
+      }
+    }
+  }, { passive: false });
+
+  canvas.addEventListener("touchend", function(e) { pointerId = null; }, { passive: true });
+  canvas.addEventListener("touchcancel", function() { pointerId = null; }, { passive: true });
+
+  actionBtn.addEventListener("click", function() {
+    var target = parseInt(actionBtn.dataset.targetLevel, 10);
+    if (!isNaN(target) && target >= 0 && target < totalLevels) startLevel(target); else showMenu();
+  });
+  retryBtn.addEventListener("click", function() {
+    var target = parseInt(retryBtn.dataset.targetLevel, 10);
+    if (!isNaN(target)) startLevel(target);
+  });
+  mapBtn.addEventListener("click", function() { showLevelMap(); });
+
+  showMenu();
+})();
+</script>
+</body>
+</html>
