@@ -3,388 +3,693 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>花雨落</title>
+<title>花灵 · 花雨落</title>
 <style>
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  :root{--bg:#0a0a1a;--fg:#e8e0d8;--card:#14142a;--card-fg:#e8e0d8;--primary:#c8a87c;--primary-fg:#0a0a1a;--muted:#2a2040;--muted-fg:#998e88;--border:#2a2040;--ring:#c8a87c;--gold:#c8a87c;--gold-dim:#8a7050;--series1:#c8a87c;--series2:#d4845a;--series3:#7aa89c;--series4:#d4b84a;--series5:#a88ab8;--series6:#c85a5a;--destructive:#c85a5a}
-  html,body{height:100%;background:var(--bg);color:var(--fg);font-family:"Noto Serif SC","Source Han Serif SC","STSong","SimSun","Songti SC",serif;-webkit-font-smoothing:antialiased;overflow:hidden}
-  body{display:flex;align-items:center;justify-content:center;min-height:100dvh;padding:8px;background:radial-gradient(ellipse at 50% 0%,#1a1030 0%,#0a0a1a 60%)}
-  body::before{content:"";position:fixed;inset:0;background-image:radial-gradient(circle at 20% 50%,rgba(200,168,124,0.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
-  #game-root{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:6px;user-select:none;-webkit-user-select:none;width:100%;max-width:420px;font-family:inherit}
-  #game-root .game-header{display:flex;align-items:center;gap:8px;padding:0 4px;width:100%}
-  #game-root .header-group{display:flex;align-items:center;gap:6px}
-  #game-root .header-group.header-right{margin-left:auto}
-  #game-root .score-label{font-size:11px;letter-spacing:2px;color:var(--muted-fg)}
-  #game-root .score-value{font-size:20px;font-weight:500;color:var(--fg);min-width:32px;text-align:right;font-feature-settings:"tnum"}
-  #game-canvas-wrapper{position:relative;width:100%;aspect-ratio:400/460;border-radius:0 0 8px 8px;overflow:hidden;box-shadow:0 0 30px rgba(200,168,124,0.08)}
-  #timer-bar-wrapper{width:100%;height:4px;background:var(--border);border-radius:2px;overflow:hidden;flex-shrink:0}
-  #timer-bar{height:100%;border-radius:2px;transition:width 0.1s linear;background:linear-gradient(90deg,var(--series2),var(--gold))}
-  #game-canvas{display:block;width:100%;height:100%;background:var(--card);outline:none;touch-action:manipulation}
-  #game-canvas:focus-visible{box-shadow:inset 0 0 0 2px var(--ring)}
-  #game-root .overlay{position:absolute;inset:0;top:0;display:flex;align-items:center;justify-content:center;background:color-mix(in srgb,var(--card) 90%,transparent);border-radius:0 0 8px 8px;transition:opacity 0.3s}
-  #game-root .overlay.hidden{opacity:0;pointer-events:none}
-  #game-root .overlay-content{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:20px;width:100%;max-width:320px;touch-action:manipulation}
-  #game-root .overlay-title{font-size:32px;font-weight:500;letter-spacing:6px;margin:0;color:var(--gold);text-shadow:0 0 20px rgba(200,168,124,0.3)}
-  #game-root .overlay-sub{margin:0;font-size:13px;color:var(--muted-fg);line-height:1.6}
-  #game-root .credit-line{font-size:11px;color:var(--gold-dim);letter-spacing:1px;margin-top:2px;opacity:0.7;text-align:center}
-  #game-root .divider{width:60px;height:1px;background:linear-gradient(90deg,transparent,var(--gold-dim),transparent);margin:2px 0}
-  #game-root .overlay-btn{font-family:inherit;font-size:15px;letter-spacing:2px;padding:10px 32px;margin-top:2px;cursor:pointer;border:1px solid var(--gold);border-radius:4px;background:transparent;color:var(--gold);transition:all 0.2s;-webkit-tap-highlight-color:transparent;touch-action:manipulation;position:relative}
-  #game-root .overlay-btn:hover{background:var(--gold);color:var(--primary-fg)}
-  #game-root .overlay-btn:active{transform:scale(0.96)}
-  #game-root .overlay-btn.primary{background:var(--gold);color:var(--primary-fg)}
-  #game-root .overlay-btn.primary:hover{background:color-mix(in srgb,var(--gold) 85%,black)}
-  #game-root .btn-group{display:flex;gap:10px;margin-top:4px}
-  #game-root .btn-group.hidden{display:none}
-  #game-root .controls-hint{display:flex;align-items:center;gap:6px;color:var(--muted-fg);margin-top:6px}
-  #game-root .controls-hint kbd{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;font-family:"PingFang SC",sans-serif;font-size:12px;border:1px solid var(--border);border-radius:4px;background:var(--bg);color:var(--fg)}
-  #game-root .controls-hint svg{width:16px;height:16px;opacity:0.5;stroke:var(--muted-fg)}
-  #game-root .final-score{font-size:32px;font-weight:500;color:var(--gold)}
-  #game-root .new-best{font-size:11px;letter-spacing:2px;color:var(--gold);animation:pulse-bright 0.6s ease-in-out infinite alternate}
-  @keyframes pulse-bright{from{opacity:0.6}to{opacity:1}}
-  #game-root .level-map{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;width:100%;max-height:420px;overflow-y:auto}
-  #game-root .level-map-path{display:flex;flex-direction:column;align-items:center;gap:0;width:100%;padding:0 8px}
-  #game-root .level-map-row{display:flex;align-items:center;gap:12px;width:100%;justify-content:center}
-  #game-root .level-map-node{width:44px;height:44px;min-width:44px;border-radius:50%;border:2px solid var(--border);background:var(--bg);color:var(--muted-fg);font-family:inherit;font-size:14px;font-weight:500;cursor:default;display:flex;align-items:center;justify-content:center;transition:all 0.3s;position:relative;flex-shrink:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-  #game-root .level-map-node.completed{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 12%,transparent);color:var(--gold)}
-  #game-root .level-map-node.current{border-color:var(--gold);background:var(--gold);color:var(--primary-fg);box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 30%,transparent),0 0 12px rgba(200,168,124,0.2);animation:node-pulse 1.5s ease-in-out infinite}
-  #game-root .level-map-node.unlocked{border-color:var(--border);color:var(--fg);cursor:pointer}
-  #game-root .level-map-node.unlocked:hover{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 8%,transparent)}
-  #game-root .level-map-node.locked{opacity:0.3;cursor:default}
-  #game-root .level-map-node .check-mark{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center}
-  #game-root .level-map-node .check-mark svg{width:10px;height:10px;stroke:var(--primary-fg);stroke-width:3}
-  #game-root .level-map-connector{width:2px;height:18px;background:var(--border);margin:0 auto;flex-shrink:0}
-  #game-root .level-map-connector.done{background:var(--gold)}
-  #game-root .level-map-connector.partial{background:linear-gradient(to bottom,var(--gold) 50%,var(--border) 50%)}
-  @keyframes node-pulse{0%,100%{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 30%,transparent),0 0 12px rgba(200,168,124,0.2)}50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--gold) 20%,transparent),0 0 20px rgba(200,168,124,0.15)}}
-  #game-root .level-intro{position:absolute;inset:0;top:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border-radius:0 0 8px 8px;opacity:0;transition:opacity 0.5s;pointer-events:none;background:color-mix(in srgb,var(--card) 92%,transparent)}
-  #game-root .level-intro.show{opacity:1}
-  #game-root .level-intro .li-level{font-size:14px;letter-spacing:4px;color:var(--muted-fg)}
-  #game-root .level-intro .li-number{font-size:48px;font-weight:500;color:var(--gold);text-shadow:0 0 30px rgba(200,168,124,0.3)}
-  #game-root .level-intro .li-flower{font-size:16px;letter-spacing:2px;color:var(--fg);margin-top:4px}
-  #game-root .level-intro .li-poem{font-size:13px;color:var(--gold-dim);font-style:italic;letter-spacing:1px;opacity:0.8}
-  @media(max-width:420px){body{padding:4px}#game-root .overlay-content{padding:12px;gap:8px}#game-root .overlay-title{font-size:26px}#game-root .score-value{font-size:17px;min-width:28px}#game-root .score-label{font-size:10px}#game-root .level-map-node{width:38px;height:38px;min-width:38px;font-size:12px}#game-root .level-map-connector{height:14px}#game-root .level-map{max-height:360px}#game-root .level-intro .li-number{font-size:38px}}
-  @media(max-width:360px){#game-root .overlay-title{font-size:22px}#game-root .overlay-btn{font-size:13px;padding:8px 20px}#game-root .level-map-node{width:32px;height:32px;min-width:32px;font-size:11px}#game-root .level-intro .li-number{font-size:30px}}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg1:#101433;--bg2:#2c1a4a;--bg3:#0f2438;
+  --fg:#f2ecdf;--mf:#a89cc0;--glass:rgba(255,255,255,0.075);
+  --glass2:rgba(255,255,255,0.05);--stroke:rgba(255,255,255,0.14);
+  --gold:#e8c87a;--gd2:#b5985c;--s2:#e3a06c;--s3:#8fbfa8;--ds:#e26d6d;
+  --card:rgba(255,255,255,0.055);
+}
+html,body{height:100%;overflow:hidden;background:var(--bg1);color:var(--fg);
+  font-family:"PingFang SC","Noto Sans SC","Source Han Sans SC","Microsoft YaHei",-apple-system,"SF Pro Text",sans-serif;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body{display:flex;align-items:center;justify-content:center;min-height:100dvh;padding:12px;
+  background:
+    radial-gradient(1100px 700px at 85% -10%,rgba(145,110,220,0.32),transparent 60%),
+    radial-gradient(900px 600px at -10% 20%,rgba(60,130,220,0.28),transparent 55%),
+    radial-gradient(800px 700px at 50% 115%,rgba(230,150,90,0.18),transparent 60%),
+    linear-gradient(160deg,var(--bg1),var(--bg2) 55%,var(--bg3))}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(circle at 50% 0%,rgba(255,255,255,0.06),transparent 45%),
+  repeating-linear-gradient(115deg,rgba(255,255,255,0.012) 0 1px,transparent 1px 28px)}
+#gr{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:10px;
+  width:100%;max-width:430px;padding:18px;border-radius:30px;
+  background:var(--glass);backdrop-filter:blur(34px) saturate(180%);-webkit-backdrop-filter:blur(34px) saturate(180%);
+  border:1px solid var(--stroke);box-shadow:0 20px 60px rgba(0,0,0,0.35),inset 0 1px 0 rgba(255,255,255,0.18),inset 0 -1px 0 rgba(255,255,255,0.06)}
+#gr::after{content:"";position:absolute;inset:0;border-radius:30px;pointer-events:none;z-index:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.12),transparent 30%,transparent 70%,rgba(255,255,255,0.06))}
+#gr>*{position:relative;z-index:1}
+#gr .gh{display:flex;align-items:center;gap:8px;padding:0 6px;width:100%}
+#gr .hg{display:flex;align-items:center;gap:7px;background:var(--glass2);border:1px solid var(--stroke);
+  border-radius:14px;padding:5px 10px}
+#gr .hg.rh{margin-left:auto}
+#gr .sl{font-size:10px;letter-spacing:2px;color:var(--mf);font-weight:500}
+#gr .sv{font-size:18px;font-weight:600;color:var(--fg);min-width:28px;text-align:right;font-feature-settings:"tnum"}
+#cw{position:relative;width:100%;aspect-ratio:400/500;border-radius:22px;overflow:hidden;
+  background:linear-gradient(180deg,rgba(18,16,46,0.72),rgba(12,12,32,0.72));
+  border:1px solid var(--stroke);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.04),inset 0 1px 8px rgba(255,255,255,0.05)}
+#tbw{width:calc(100% - 12px);height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;margin:0 6px}
+#tb{height:100%;border-radius:2px;transition:width 0.12s linear;
+  background:linear-gradient(90deg,rgba(232,160,108,0.8),var(--gold))}
+#cv{display:block;width:100%;height:100%;background:transparent;outline:none;touch-action:manipulation}
+#cv:focus-visible{box-shadow:inset 0 0 0 2px rgba(232,200,122,0.5)}
+#gr .ov{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:5;
+  background:rgba(14,12,38,0.42);backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%);
+  border-radius:22px;transition:opacity 0.3s}
+#gr .ov.hd{opacity:0;pointer-events:none}
+#gr .oc{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:20px;width:88%;max-width:330px;
+  background:linear-gradient(145deg,rgba(255,255,255,0.09),rgba(255,255,255,0.03));
+  border:1px solid var(--stroke);border-radius:22px;box-shadow:0 8px 30px rgba(0,0,0,0.2),inset 0 1px 0 rgba(255,255,255,0.14)}
+#gr .ot{font-size:26px;font-weight:600;letter-spacing:4px;margin:0;color:var(--fg);
+  background:linear-gradient(120deg,#f6e5bb,var(--gold),#d7b36a);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  text-shadow:0 2px 20px rgba(232,200,122,0.12)}
+#gr .os{margin:0;font-size:12.5px;color:var(--mf);line-height:1.7}
+#gr .cr{font-size:10px;color:var(--gd2);letter-spacing:1.5px;opacity:0.6;text-align:center}
+#gr .dv{width:54px;height:1px;background:linear-gradient(90deg,transparent,rgba(232,200,122,0.5),transparent);margin:2px 0}
+#gr .obtn{font-family:inherit;font-size:14px;font-weight:500;letter-spacing:2px;padding:10px 32px;margin-top:2px;cursor:pointer;
+  border:1px solid rgba(232,200,122,0.45);border-radius:16px;background:rgba(232,200,122,0.08);color:var(--gold);
+  transition:all 0.25s cubic-bezier(0.2,0.8,0.2,1);-webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  box-shadow:0 4px 16px rgba(0,0,0,0.15),inset 0 1px 0 rgba(255,255,255,0.1)}
+#gr .obtn:hover{background:rgba(232,200,122,0.18);transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,0,0,0.2)}
+#gr .obtn:active{transform:scale(0.97)}
+#gr .obtn.pr{background:linear-gradient(135deg,#e8c87a,#d7b36a);color:#201a2c;border-color:transparent;font-weight:600;
+  box-shadow:0 6px 20px rgba(232,200,122,0.25),inset 0 1px 0 rgba(255,255,255,0.4)}
+#gr .obtn.pr:hover{box-shadow:0 10px 28px rgba(232,200,122,0.35)}
+#gr .bg{display:flex;gap:10px;margin-top:2px}
+#gr .bg.hd{display:none}
+#gr .fs{font-size:30px;font-weight:600;color:var(--gold)}
+#gr .nb{font-size:10px;letter-spacing:2px;color:var(--gold);animation:pb 0.6s ease-in-out infinite alternate}
+@keyframes pb{from{opacity:0.5}to{opacity:1}}
+#gr .lm{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;width:100%;max-height:430px;overflow-y:auto}
+#gr .lm::-webkit-scrollbar{width:0}
+#gr .lp{display:flex;flex-direction:column;align-items:center;gap:0;width:100%;padding:0 8px}
+#gr .lr{display:flex;align-items:center;gap:12px;width:100%;justify-content:center}
+#gr .ln{width:42px;height:42px;min-width:42px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.16);
+  background:rgba(255,255,255,0.05);color:var(--mf);font-family:inherit;font-size:13px;font-weight:500;cursor:default;
+  display:flex;align-items:center;justify-content:center;transition:all 0.3s;position:relative;flex-shrink:0;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;box-shadow:inset 0 1px 0 rgba(255,255,255,0.1)}
+#gr .ln.co{border-color:rgba(232,200,122,0.55);background:rgba(232,200,122,0.12);color:var(--gold)}
+#gr .ln.cu{border-color:rgba(232,200,122,0.8);background:linear-gradient(135deg,#e8c87a,#d7b36a);color:#201a2c;font-weight:600;
+  box-shadow:0 0 0 3px rgba(232,200,122,0.18),0 8px 24px rgba(232,200,122,0.25);animation:np 1.5s ease-in-out infinite}
+#gr .ln.un{border-color:rgba(255,255,255,0.2);color:var(--fg);cursor:pointer}
+#gr .ln.un:hover{border-color:rgba(232,200,122,0.5);background:rgba(232,200,122,0.08)}
+#gr .ln.lo{opacity:0.25;cursor:default}
+#gr .ln .cm{position:absolute;top:-3px;right:-3px;width:15px;height:15px;background:linear-gradient(135deg,#e8c87a,#d7b36a);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(232,200,122,0.3)}
+#gr .ln .cm svg{width:8px;height:8px;stroke:#201a2c;stroke-width:3.5}
+#gr .lc{width:2px;height:14px;background:rgba(255,255,255,0.12);margin:0 auto;flex-shrink:0}
+#gr .lc.do{background:rgba(232,200,122,0.45)}
+#gr .lc.pa{background:linear-gradient(to bottom,rgba(232,200,122,0.45) 50%,rgba(255,255,255,0.12) 50%)}
+@keyframes np{0%,100%{box-shadow:0 0 0 3px rgba(232,200,122,0.18),0 8px 24px rgba(232,200,122,0.25)}50%{box-shadow:0 0 0 6px rgba(232,200,122,0.12),0 14px 34px rgba(232,200,122,0.18)}}
+#gr .lii{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:4;
+  border-radius:22px;opacity:0;transition:opacity 0.45s;pointer-events:none;background:rgba(14,12,38,0.55);
+  backdrop-filter:blur(26px) saturate(160%);-webkit-backdrop-filter:blur(26px) saturate(160%)}
+#gr .lii.sh{opacity:1}
+#gr .lii .ll{font-size:12px;letter-spacing:5px;color:var(--mf)}
+#gr .lii .lnum{font-size:56px;font-weight:600;color:var(--fg);letter-spacing:2px;
+  background:linear-gradient(120deg,#f6e5bb,var(--gold),#d7b36a);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 4px 24px rgba(232,200,122,0.2))}
+#gr .lii .lf{font-size:16px;font-weight:500;letter-spacing:3px;color:var(--fg)}
+#gr .lii .lpo{font-size:12px;color:var(--gd2);letter-spacing:2px;opacity:0.85}
+#gr .sk{position:absolute;bottom:14px;right:14px;z-index:8;font-family:inherit;font-size:11px;letter-spacing:2px;padding:6px 14px;
+  border:1px solid rgba(255,255,255,0.22);border-radius:12px;background:rgba(255,255,255,0.09);color:var(--fg);cursor:pointer;
+  opacity:0;transition:opacity 0.3s;touch-action:manipulation;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+#gr .sk.sh{opacity:1}
+#gr .cd{position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:6;font-size:14px;font-weight:600;letter-spacing:3px;
+  color:var(--gold);opacity:0;transition:opacity 0.3s;pointer-events:none;text-shadow:0 2px 16px rgba(232,200,122,0.4)}
+#gr .cd.sh{opacity:1}
+#gr .shh{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:6;font-size:10px;letter-spacing:2px;
+  color:var(--gold);opacity:0;transition:opacity 0.3s;pointer-events:none;text-shadow:0 2px 12px rgba(232,200,122,0.35)}
+#gr .shh.sh{opacity:1}
+@media(max-width:440px){body{padding:8px}#gr{padding:12px;border-radius:26px;gap:8px}#gr .oc{padding:16px;gap:8px;border-radius:18px}#gr .ot{font-size:22px}#gr .sv{font-size:15px;min-width:26px}#gr .sl{font-size:9px}#gr .hg{padding:4px 8px;border-radius:12px}#gr .ln{width:36px;height:36px;min-width:36px;font-size:12px}#gr .lc{height:11px}#gr .lm{max-height:370px}#gr .lii .lnum{font-size:44px}}
+@media(max-width:360px){#gr .ot{font-size:19px}#gr .obtn{font-size:13px;padding:8px 22px}#gr .ln{width:31px;height:31px;min-width:31px;font-size:11px}#gr .lii .lnum{font-size:36px}}
 </style>
 </head>
 <body>
-<div id="game-root">
-  <div class="game-header">
-    <span class="header-group"><span class="score-label">得分</span><span id="score" class="score-value">0</span></span>
-    <span class="header-group"><span class="score-label">关卡</span><span id="level-display" class="score-value">1</span></span>
-    <span class="header-group header-right"><span class="score-label">最高</span><span id="best" class="score-value">0</span></span>
+<div id="gr">
+  <div class="gh">
+    <span class="hg"><span class="sl">花蜜</span><span id="se" class="sv">0</span></span>
+    <span class="hg"><span class="sl">花境</span><span id="ld" class="sv">1</span></span>
+    <span class="hg rh"><span class="sl">最高</span><span id="be" class="sv">0</span></span>
   </div>
-  <div id="timer-bar-wrapper"><div id="timer-bar" style="width:100%"></div></div>
-  <div id="game-canvas-wrapper">
-    <canvas id="game-canvas" width="400" height="460" tabindex="0"></canvas>
-    <div id="overlay" class="overlay">
-      <div id="overlay-content" class="overlay-content">
-        <div class="divider"></div>
-        <h2 id="overlay-title" class="overlay-title">花雨落</h2>
-        <div class="divider"></div>
-        <p id="overlay-sub" class="overlay-sub">每关十五息，落块如飞雨<br>十大险关，步步惊心</p>
-        <button id="action-btn" class="overlay-btn primary">开始闯关</button>
-        <div id="btn-group" class="btn-group hidden">
-          <button id="retry-btn" class="overlay-btn primary">重试本关</button>
-          <button id="map-btn" class="overlay-btn">闯关地图</button>
+  <div id="tbw"><div id="tb" style="width:100%"></div></div>
+  <div id="cw">
+    <canvas id="cv" width="400" height="500" tabindex="0"></canvas>
+    <div id="cd" class="cd"></div>
+    <div id="shh" class="shh">✦ 点击发动花盾 ✦</div>
+    <div id="ov" class="ov">
+      <div class="oc">
+        <div class="dv"></div>
+        <h2 id="ot" class="ot">花灵 · 花雨落</h2>
+        <div class="dv"></div>
+        <p id="os" class="os">采集花蜜，躲避花敌<br>十大花境，步步惊心</p>
+        <button id="ab" class="obtn pr">开始闯关</button>
+        <div id="bg" class="bg hd">
+          <button id="rb" class="obtn pr">重试本关</button>
+          <button id="mb" class="obtn">闯关地图</button>
         </div>
       </div>
     </div>
-    <div id="level-intro" class="level-intro">
-      <div class="li-level">第 <span id="li-number" class="li-number">一</span> 关</div>
-      <div id="li-flower" class="li-flower"></div>
-      <div id="li-poem" class="li-poem"></div>
+    <div id="lii" class="lii">
+      <div class="ll">第 <span id="lnum" class="lnum">一</span> 花境</div>
+      <div id="lf" class="lf"></div>
+      <div id="lpo" class="lpo"></div>
     </div>
+    <button id="sk" class="sk">跳过 »</button>
   </div>
-  <p class="credit-line">由 YanYue 赠 M1 Pro 所制</p>
+  <p class="cr">由 YanYue 赠 M1 Pro 所制</p>
 </div>
-
 <script>
 (function(){
-  var root=document.getElementById("game-root");
-  var canvas=document.getElementById("game-canvas");
-  var ctx=canvas.getContext("2d");
-  var overlay=document.getElementById("overlay");
-  var overlayTitle=document.getElementById("overlay-title");
-  var overlaySub=document.getElementById("overlay-sub");
-  var actionBtn=document.getElementById("action-btn");
-  var retryBtn=document.getElementById("retry-btn");
-  var mapBtn=document.getElementById("map-btn");
-  var btnGroup=document.getElementById("btn-group");
-  var scoreEl=document.getElementById("score");
-  var bestEl=document.getElementById("best");
-  var levelDisplay=document.getElementById("level-display");
-  var timerBar=document.getElementById("timer-bar");
-  var levelIntro=document.getElementById("level-intro");
-  var liNumber=document.getElementById("li-number");
-  var liFlower=document.getElementById("li-flower");
-  var liPoem=document.getElementById("li-poem");
+  var R=document.getElementById("gr"),CV=document.getElementById("cv"),CX=CV.getContext("2d");
+  var OV=document.getElementById("ov"),OT=document.getElementById("ot"),OS=document.getElementById("os");
+  var AB=document.getElementById("ab"),RB=document.getElementById("rb"),MB=document.getElementById("mb");
+  var BG=document.getElementById("bg"),SE=document.getElementById("se"),BE=document.getElementById("be");
+  var LD=document.getElementById("ld"),TB=document.getElementById("tb");
+  var LI=document.getElementById("lii"),LN=document.getElementById("lnum"),LF=document.getElementById("lf");
+  var LP=document.getElementById("lpo"),SK=document.getElementById("sk");
+  var CD=document.getElementById("cd"),SH=document.getElementById("shh");
 
-  var W=400,H=460,PS=22,BS=20;
-  var LT=15,PD=4000;
+  var W=400,H=500,PS=11,LT=15,PD=4000;
   var LV=["一","二","三","四","五","六","七","八","九","十"];
-  var POEMS=[
-    "雪落无声，暗香浮动",
-    "落英缤纷，刹那芳华",
-    "凌寒独放，傲骨铮铮",
-    "人面桃花，相映成红",
-    "紫雾弥漫，幽香满怀",
-    "心向骄阳，灿烂如初",
-    "出淤不染，濯涟不妖",
-    "金粟满枝，十里飘香",
-    "待到秋来，我花开后",
-    "带刺柔情，红颜如血",
+  var PO=["雪落无声，暗香浮动","落英缤纷，刹那芳华","凌寒独放，傲骨铮铮","人面桃花，相映成红","紫雾弥漫，幽香满怀","心向骄阳，灿烂如初","出淤不染，濯涟不妖","金粟满枝，十里飘香","待到秋来，我花开后","带刺柔情，红颜如血"];
+  var FC=[
+    {n:"茉莉花",c:"#f5ece0",k:"#e8d4a0",l:"#fff8f0",d:"#d4c4a0"},
+    {n:"樱花",c:"#ffb7c5",k:"#ff8fa3",l:"#ffe0e8",d:"#e88a9a"},
+    {n:"梅花",c:"#e63946",k:"#c1121f",l:"#ff8a95",d:"#a01018"},
+    {n:"桃花",c:"#ffc8dd",k:"#ffafcc",l:"#ffe8f0",d:"#e898b0"},
+    {n:"薰衣草",c:"#b39ddb",k:"#7c4dff",l:"#d1c4e9",d:"#8a6ab8"},
+    {n:"向日葵",c:"#ffd54f",k:"#5d4037",l:"#fff176",d:"#b8860b"},
+    {n:"荷花",c:"#f8bbd0",k:"#f06292",l:"#fce4ec",d:"#d81b60"},
+    {n:"桂花",c:"#ffe082",k:"#ff8f00",l:"#ffecb3",d:"#e6a800"},
+    {n:"菊花",c:"#ce93d8",k:"#8e24aa",l:"#e1bee7",d:"#6a1b9a"},
+    {n:"玫瑰花",c:"#e91e63",k:"#880e4f",l:"#f48fb1",d:"#c2185b"}
   ];
-
-  var FLOWER_TYPES=[
-    {name:"茉莉花",color:"#f5ece0",size:5},
-    {name:"樱花",color:"#ffb7c5",size:5},
-    {name:"梅花",color:"#e63946",size:4},
-    {name:"桃花",color:"#ffc8dd",size:5},
-    {name:"薰衣草",color:"#b39ddb",size:4},
-    {name:"向日葵",color:"#ffd54f",size:6},
-    {name:"荷花",color:"#f8bbd0",size:6},
-    {name:"桂花",color:"#ffe082",size:3},
-    {name:"菊花",color:"#ce93d8",size:5},
-    {name:"玫瑰花",color:"#e91e63",size:5},
+  var LS=[
+    {sp:0.7,iv:950,fi:0},{sp:0.9,iv:880,fi:1},{sp:1.1,iv:820,fi:2},{sp:1.3,iv:760,fi:3},
+    {sp:1.6,iv:700,fi:4},{sp:1.9,iv:640,fi:5},{sp:2.2,iv:580,fi:6},{sp:2.6,iv:520,fi:7},
+    {sp:3.0,iv:460,fi:8},{sp:3.5,iv:400,fi:9}
   ];
-
-  var LEVELS=[
-    {spd:0.7,iv:950,fi:0},{spd:0.9,iv:880,fi:1},
-    {spd:1.1,iv:820,fi:2},{spd:1.3,iv:760,fi:3},
-    {spd:1.6,iv:700,fi:4},{spd:1.9,iv:640,fi:5},
-    {spd:2.2,iv:580,fi:6},{spd:2.6,iv:520,fi:7},
-    {spd:3.0,iv:460,fi:8},{spd:3.5,iv:400,fi:9},
-  ];
-
-  var pl,bl,pt,pe,sc,st,aid,si,di,lvlTimer,li,ke={},tl=LEVELS.length,cl=[],peTi=0;
-  var cb=parseInt(localStorage.getItem("ddBest")||"0",10);
-  var sp=(localStorage.getItem("ddProg")||"").split(",").filter(Boolean).map(Number);
-  cl=sp;bestEl.textContent=cb;
+  var pl,en,pa,pe,sc,st,aid,si,di,lvTi,liIdx,ke={},tl=LS.length,cl=[],peTi=0,neTi=0,am=[];
+  var caSh=false,shAc=false,shTi=0,co=0,coTi=0,coTo=3000,nc=0,skSh=false;
+  var cb=parseInt(localStorage.getItem("ddB")||"0",10);
+  var sp=(localStorage.getItem("ddP")||"").split(",").filter(Boolean).map(Number);
+  cl=sp;BE.textContent=cb;
 
   function gc(){
-    var s=getComputedStyle(root);
+    var s=getComputedStyle(R);
+    return{f:m.getPropertyValue?0:0};
+  }
+
+  // Simpler color getter - use CSS vars when available
+  function gc2(){
+    var s=getComputedStyle(R);
     return{
-      fg:s.getPropertyValue("--fg").trim(),
-      mf:s.getPropertyValue("--muted-fg").trim(),
-      cd:s.getPropertyValue("--card").trim(),
-      bg:s.getPropertyValue("--bg").trim(),
-      bd:s.getPropertyValue("--border").trim(),
-      s1:s.getPropertyValue("--gold").trim(),
-      s2:s.getPropertyValue("--series2").trim(),
-      s3:s.getPropertyValue("--series3").trim(),
-      ds:s.getPropertyValue("--destructive").trim(),
+      mf:s.getPropertyValue("--mf").trim()||"#a89cc0",
+      cd:"#141228",
+      gd:s.getPropertyValue("--gold").trim()||"#e8c87a",
+      bd:"rgba(255,255,255,0.12)",
+      ds:s.getPropertyValue("--ds").trim()||"#e26d6d"
     };
   }
 
-  function save(){localStorage.setItem("ddProg",cl.join(","))}
+  function sav(){localStorage.setItem("ddP",cl.join(","))}
 
-  function rrc(ctx,x,y,w,h,r){
-    ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
-    ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);
-    ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
-    ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);
-    ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+  // Flower drawing helpers
+  function d5(cx,cy,r,co,rt,cc,al){
+    CX.save();CX.translate(cx,cy);CX.rotate(rt||0);CX.globalAlpha=al||0.85;
+    for(var i=0;i<5;i++){
+      var a=i/5*Math.PI*2;CX.save();CX.rotate(a);
+      CX.fillStyle=co;CX.beginPath();CX.ellipse(0,-r*0.6,r*0.3,r*0.55,0,0,Math.PI*2);CX.fill();CX.restore()
+    }
+    if(cc){CX.globalAlpha=0.9;CX.fillStyle=cc;CX.beginPath();CX.arc(0,0,r*0.15,0,Math.PI*2);CX.fill()}
+    CX.restore()
   }
 
-  function dp(ctx,x,y,sz,an,co,al){
-    ctx.save();ctx.translate(x,y);ctx.rotate(an);ctx.globalAlpha=al;
-    ctx.fillStyle=co;ctx.beginPath();
-    ctx.ellipse(sz*0.15,-sz*0.5,sz*0.25,sz*0.5,0,0,Math.PI*2);
-    ctx.fill();ctx.strokeStyle=co;ctx.globalAlpha=al*0.25;ctx.lineWidth=0.5;
-    ctx.beginPath();ctx.moveTo(sz*0.15,-sz*0.05);ctx.lineTo(sz*0.15,-sz*0.9);
-    ctx.stroke();ctx.restore();
+  function dch(cx,cy,r,co,rt,cc,al){
+    CX.save();CX.translate(cx,cy);CX.rotate(rt||0);CX.globalAlpha=al||0.85;
+    for(var i=0;i<5;i++){
+      var a=i/5*Math.PI*2;CX.save();CX.rotate(a);
+      CX.fillStyle=co;CX.beginPath();
+      CX.moveTo(0,-r*0.05);
+      CX.quadraticCurveTo(r*0.3,-r*0.35,r*0.25,-r*0.7);
+      CX.quadraticCurveTo(0,-r*0.85,-r*0.25,-r*0.7);
+      CX.quadraticCurveTo(-r*0.3,-r*0.35,0,-r*0.05);
+      CX.closePath();CX.fill();CX.restore()
+    }
+    if(cc){CX.globalAlpha=0.9;CX.fillStyle=cc;CX.beginPath();CX.arc(0,0,r*0.15,0,Math.PI*2);CX.fill()}
+    CX.restore()
   }
 
-  function initLvl(idx){
-    li=idx;pl={x:W/2,y:H-36,r:PS/2};bl=[];pt=[];pe=[];
-    sc=0;si=0;di=0;lvlTimer=LT*1000;peTi=0;
-    scoreEl.textContent="0";levelDisplay.textContent=idx+1;
-    actionBtn.style.display="";btnGroup.classList.add("hidden");
-    overlay.classList.add("hidden");levelIntro.classList.remove("show");
-    st="playing";
+  function dsu(cx,cy,r,co,rt,cc,al){
+    CX.save();CX.translate(cx,cy);CX.rotate(rt||0);CX.globalAlpha=al||0.85;
+    for(var i=0;i<16;i++){
+      var a=i/16*Math.PI*2;CX.save();CX.rotate(a);
+      CX.fillStyle=co;CX.beginPath();CX.ellipse(0,-r*0.55,r*0.08,r*0.5,0,0,Math.PI*2);CX.fill();CX.restore()
+    }
+    if(cc){CX.globalAlpha=0.85;CX.fillStyle=cc;CX.beginPath();CX.arc(0,0,r*0.35,0,Math.PI*2);CX.fill();
+      CX.globalAlpha=0.3;CX.fillStyle="#ffd54f";CX.beginPath();CX.arc(0,0,r*0.25,0,Math.PI*2);CX.fill()}
+    CX.restore()
   }
 
-  function sb(){
-    var c=gc();var l=LEVELS[Math.min(li,LEVELS.length-1)];
-    var w=BS+Math.random()*16;var h=BS+Math.random()*16;
-    var x=Math.random()*(W-w-10)+5;
-    var spd=l.spd+Math.random()*l.spd*0.8+sc*0.002;
-    var cs=[c.s1,c.s2,c.s3,c.ds,c.mf];
-    var co=cs[Math.floor(Math.random()*cs.length)]||c.s1;
-    bl.push({x:x,y:-h,w:w,h:h,spd:Math.min(spd,6.5),co:co,rot:Math.random()*Math.PI*2,rs:(Math.random()-0.5)*0.05});
+  function d6(cx,cy,r,co,rt,cc,al){
+    CX.save();CX.translate(cx,cy);CX.rotate(rt||0);CX.globalAlpha=al||0.8;
+    for(var i=0;i<6;i++){
+      var a=i/6*Math.PI*2;CX.save();CX.rotate(a);
+      CX.fillStyle=co;CX.beginPath();CX.ellipse(0,-r*0.55,r*0.2,r*0.5,0,0,Math.PI*2);CX.fill();CX.restore()
+    }
+    if(cc){CX.globalAlpha=0.9;CX.fillStyle=cc;CX.beginPath();CX.arc(0,0,r*0.2,0,Math.PI*2);CX.fill()}
+    CX.restore()
   }
 
-  function spw(x,y,co,n){for(var i=0;i<n;i++){var a=Math.random()*Math.PI*2;var s=1+Math.random()*3;pt.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,l:1,d:0.015+Math.random()*0.025,sz:2+Math.random()*4,co:co})}}
+  function d8(cx,cy,r,co,rt,cc,al){
+    CX.save();CX.translate(cx,cy);CX.rotate(rt||0);CX.globalAlpha=al||0.8;
+    for(var i=0;i<8;i++){
+      var a=i/8*Math.PI*2;CX.save();CX.rotate(a);
+      CX.fillStyle=co;CX.beginPath();CX.ellipse(0,-r*0.5,r*0.25,r*0.45,0,0,Math.PI*2);CX.fill();CX.restore()
+    }
+    if(cc){CX.globalAlpha=0.9;CX.fillStyle=cc;CX.beginPath();CX.arc(0,0,r*0.18,0,Math.PI*2);CX.fill()}
+    CX.restore()
+  }
 
-  function spwPe(n){
-    var l=LEVELS[Math.min(li,LEVELS.length-1)];
-    var f=FLOWER_TYPES[l.fi];
-    for(var i=0;i<n;i++){pe.push({x:Math.random()*(W+40)-20,y:Math.random()*H*-0.5-10,sz:f.size*(0.5+Math.random()*0.8),an:Math.random()*Math.PI*2,rs:(Math.random()-0.5)*0.06,vx:(Math.random()-0.5)*0.8,vy:0.3+Math.random()*0.8,sw:Math.random()*0.03,so:Math.random()*Math.PI*2,co:f.color,al:0.6+Math.random()*0.4})}
+  function dBF(cx,cy,sz,fi,rt,al){
+    var f=FC[fi];
+    if(fi===0)d5(cx,cy,sz,f.c,rt,f.k,al);
+    else if(fi===1)dch(cx,cy,sz,f.c,rt,f.k,al);
+    else if(fi===5)dsu(cx,cy,sz,f.c,rt,f.d,al);
+    else if(fi===4||fi===8)d6(cx,cy,sz,f.c,rt,f.k,al);
+    else if(fi===6)d8(cx,cy,sz,f.c,rt,f.k,al);
+    else d5(cx,cy,sz,f.c,rt,f.k,al)
+  }
+
+  function dFE(tp,x,y,sz,co,dk,rt,fi){
+    CX.save();CX.translate(x,y);
+    if(tp===0){
+      CX.fillStyle=co;CX.globalAlpha=0.85;
+      CX.beginPath();CX.ellipse(0,0,sz*0.4,sz*0.55,rt||0,0,Math.PI*2);CX.fill();
+      CX.fillStyle=dk;CX.globalAlpha=0.5;
+      CX.beginPath();CX.moveTo(-sz*0.15,sz*0.35);CX.quadraticCurveTo(0,sz*0.7,sz*0.15,sz*0.35);CX.fill();
+      CX.strokeStyle=dk;CX.globalAlpha=0.3;CX.lineWidth=0.5;
+      CX.beginPath();CX.moveTo(0,sz*0.5);CX.lineTo(0,sz*0.85);CX.stroke()
+    }else if(tp===1){
+      CX.save();CX.rotate(rt||0);CX.fillStyle=co;CX.globalAlpha=0.8;
+      CX.beginPath();CX.moveTo(0,-sz*0.05);
+      CX.quadraticCurveTo(sz*0.3,-sz*0.3,sz*0.25,-sz*0.65);
+      CX.quadraticCurveTo(0,-sz*0.85,-sz*0.25,-sz*0.65);
+      CX.quadraticCurveTo(-sz*0.3,-sz*0.3,0,-sz*0.05);
+      CX.closePath();CX.fill();
+      CX.strokeStyle=dk;CX.globalAlpha=0.2;CX.lineWidth=0.5;
+      CX.beginPath();CX.moveTo(0,-sz*0.1);CX.lineTo(0,-sz*0.75);CX.stroke();CX.restore()
+    }else if(tp===2){
+      CX.fillStyle=co;CX.globalAlpha=0.7;CX.beginPath();CX.arc(0,0,sz*0.35,0,Math.PI*2);CX.fill();
+      CX.fillStyle=dk;CX.globalAlpha=0.4;
+      for(var i=0;i<8;i++){
+        var a=i/8*Math.PI*2;
+        CX.beginPath();CX.arc(Math.cos(a)*sz*0.2,Math.sin(a)*sz*0.2,sz*0.08,0,Math.PI*2);CX.fill()
+      }
+    }else if(tp===3){
+      CX.save();CX.rotate(rt||0);CX.fillStyle=co;CX.globalAlpha=0.85;
+      CX.beginPath();CX.moveTo(0,-sz*0.8);CX.lineTo(-sz*0.1,sz*0.1);CX.lineTo(sz*0.1,sz*0.1);CX.closePath();CX.fill();
+      CX.fillStyle=dk;CX.globalAlpha=0.4;
+      CX.beginPath();CX.moveTo(0,-sz*0.65);CX.lineTo(-sz*0.05,sz*0.05);CX.lineTo(sz*0.05,sz*0.05);CX.closePath();CX.fill();CX.restore()
+    }else if(tp===4){
+      d5(0,0,sz*0.4,co,rt,dk,0.75)
+    }
+    CX.restore()
+  }
+
+  function dNe(x,y,sz,co){
+    CX.save();CX.translate(x,y);
+    var g=CX.createRadialGradient(0,0,0,0,0,sz);
+    g.addColorStop(0,co||"#ffe082");g.addColorStop(1,"#cc8800");
+    CX.fillStyle=g;CX.globalAlpha=0.9;
+    CX.beginPath();CX.ellipse(0,0,sz*0.4,sz*0.55,0,0,Math.PI*2);CX.fill();
+    CX.fillStyle="#fff";CX.globalAlpha=0.25;
+    CX.beginPath();CX.arc(-sz*0.12,-sz*0.15,sz*0.1,0,Math.PI*2);CX.fill();
+    CX.restore()
+  }
+
+  function iL(idx){
+    liIdx=idx;
+    pl={x:W/2,y:H-52,r:PS};
+    en=[];pa=[];pe=[];am=[];
+    sc=0;si=0;di=0;lvTi=LT*1000;peTi=0;neTi=0;
+    co=0;coTi=0;nc=0;caSh=false;shAc=false;shTi=0;skSh=false;
+    SE.textContent="0";LD.textContent=idx+1;
+    AB.style.display="";BG.classList.add("hd");
+    OV.classList.add("hd");LI.classList.remove("sh");
+    SK.classList.remove("sh");CD.classList.remove("sh");SH.classList.remove("sh");
+    st="p";spAm()
+  }
+
+  function spAm(){
+    var fi=LS[Math.min(liIdx,LS.length-1)].fi,co=FC[fi].c;
+    for(var i=0;i<8;i++){
+      am.push({x:Math.random()*W,y:Math.random()*H,sz:2+Math.random()*3,an:Math.random()*Math.PI*2,rs:(Math.random()-0.5)*0.02,vx:(Math.random()-0.5)*0.15,vy:0.1+Math.random()*0.2,co:co,al:0.08+Math.random()*0.08})
+    }
+  }
+
+  function spE(){
+    var l=LS[Math.min(liIdx,LS.length-1)],f=FC[l.fi];
+    var sz=12+Math.random()*12,x=Math.random()*(W-sz*2)+sz,spd=l.sp+Math.random()*l.sp*0.6+sc*0.002;
+    var tp=Math.floor(Math.random()*5);
+    var e={x:x,y:-sz,sz:sz,sp:Math.min(spd,5.5),tp:tp,rt:Math.random()*Math.PI*2,rs:(Math.random()-0.5)*0.06,co:f.c,dk:f.d,fi:l.fi};
+    if(tp===1){e.wb=Math.random()*0.015;e.wo=Math.random()*Math.PI*2}
+    if(tp===2){e.vx=(Math.random()-0.5)*2.5;e.vy=spd}
+    if(tp===3){var d=Math.random()>0.5?1:-1;e.vx=d*(1+Math.random()*0.8);e.vy=spd*0.7}
+    if(tp===4){e.vy=spd*0.5}
+    en.push(e)
+  }
+
+  function spN(){
+    var fi=LS[Math.min(liIdx,LS.length-1)].fi,co=FC[fi].l;
+    var x=20+Math.random()*(W-40),sz=5+Math.random()*3;
+    pa.push({x:x,y:-10,sz:sz,vy:0.4+Math.random()*0.3,vx:(Math.random()-0.5)*0.3,co:co,ty:"n"})
+  }
+
+  function spEx(x,y,co,n){
+    for(var i=0;i<n;i++){
+      var a=Math.random()*Math.PI*2,s=1+Math.random()*3;
+      pa.push({x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,l:1,d:0.02+Math.random()*0.03,sz:2+Math.random()*3,co:co,ty:"x"})
+    }
+  }
+
+  function spPe(n){
+    var fi=LS[Math.min(liIdx,LS.length-1)].fi;
+    for(var i=0;i<n;i++){
+      pe.push({x:Math.random()*(W+40)-20,y:Math.random()*H*-0.3-10,sz:8+Math.random()*12,fi:fi,an:Math.random()*Math.PI*2,rs:(Math.random()-0.5)*0.04,vx:(Math.random()-0.5)*0.5,vy:0.3+Math.random()*0.6,sw:Math.random()*0.02,so:Math.random()*Math.PI*2,al:0.5+Math.random()*0.5})
+    }
   }
 
   function upd(dt){
-    if(st==="playing"){
-      var dx=0;if(ke["ArrowLeft"]||ke["KeyA"])dx=-1;if(ke["ArrowRight"]||ke["KeyD"])dx=1;
-      pl.x+=dx*300*(dt/1000);pl.x=Math.max(pl.r,Math.min(W-pl.r,pl.x));
-      lvlTimer-=dt;var pct=Math.max(0,lvlTimer/(LT*1000));timerBar.style.width=(pct*100)+"%";
-      if(lvlTimer<=0){sc=Math.max(sc,1);scoreEl.textContent=sc;onLvlDone();return}
-      di+=dt;if(di>1000){sc++;scoreEl.textContent=sc;di=0}
-      var l=LEVELS[Math.min(li,LEVELS.length-1)];si+=dt;
-      if(si>=l.iv){var n=Math.floor(si/l.iv);for(var i=0;i<Math.min(n,3);i++)sb();si=si%l.iv}
-      for(var i=bl.length-1;i>=0;i--){var b=bl[i];b.y+=b.spd;b.rot+=b.rs;var cx=Math.max(b.x,Math.min(pl.x,b.x+b.w));var cy=Math.max(b.y,Math.min(pl.y,b.y+b.h));var ddx=pl.x-cx;var ddy=pl.y-cy;if(ddx*ddx+ddy*ddy<pl.r*pl.r){spw(pl.x,pl.y,gc().ds,25);onGO();return}if(b.y>H+b.h)bl.splice(i,1)}
-      for(var i=pt.length-1;i>=0;i--){var p=pt[i];p.x+=p.vx;p.y+=p.vy;p.vy+=0.05;p.l-=p.d;if(p.l<=0)pt.splice(i,1)}
+    if(st==="p"){
+      var dx=0;
+      if(ke["ArrowLeft"]||ke["KeyA"])dx=-1;
+      if(ke["ArrowRight"]||ke["KeyD"])dx=1;
+      pl.x+=dx*300*(dt/1000);
+      pl.x=Math.max(pl.r,Math.min(W-pl.r,pl.x));
+      if(caSh&&!shAc&&(ke["Space"]||ke["Enter"]||ke["KeyS"])){acSh()}
+
+      lvTi-=dt;var pct=Math.max(0,lvTi/(LT*1000));TB.style.width=(pct*100)+"%";
+      if(lvTi<=0){sc=Math.max(sc,1);SE.textContent=sc;onLD();return}
+      di+=dt;if(di>1000){sc++;SE.textContent=sc;di=0}
+      if(co>0){coTi+=dt;if(coTi>coTo){co=0;CD.classList.remove("sh")}}
+
+      var l=LS[Math.min(liIdx,LS.length-1)];si+=dt;
+      if(si>=l.iv){var n=Math.floor(si/l.iv);for(var i=0;i<n&&i<4;i++)spE();si=si%l.iv}
+      neTi+=dt;if(neTi>1500+Math.random()*1200){spN();neTi=0}
+      if(shAc){shTi-=dt;if(shTi<=0){shAc=false;caSh=false;SH.classList.remove("sh")}}
+
+      for(var i=en.length-1;i>=0;i--){
+        var e=en[i];
+        if(e.tp===0){e.y+=e.sp;e.rt+=e.rs}
+        else if(e.tp===1){e.y+=e.sp*0.8;e.x+=Math.sin(e.wo+performance.now()*e.wb)*1.2;e.rt+=e.rs}
+        else if(e.tp===2){e.x+=e.vx;e.y+=e.vy;if(e.x<0||e.x>W)e.vx=-e.vx;e.rt+=e.rs}
+        else if(e.tp===3){e.x+=e.vx;e.y+=e.vy;e.rt+=e.rs*2}
+        else if(e.tp===4){e.y+=e.vy;var d=pl.x-e.x;if(Math.abs(d)>5)e.x+=Math.sign(d)*e.sp*0.15;e.rt+=e.rs}
+        if(shAc)continue;
+        var cx2=Math.max(e.x-e.sz*0.4,Math.min(pl.x,e.x+e.sz*0.4));
+        var cy2=Math.max(e.y-e.sz*0.5,Math.min(pl.y,e.y+e.sz*0.5));
+        var dx2=pl.x-cx2,dy2=pl.y-cy2;
+        if(dx2*dx2+dy2*dy2<pl.r*pl.r){spEx(pl.x,pl.y,"#e26d6d",20);onGO();return}
+        if(e.y>H+e.sz)en.splice(i,1)
+      }
+
+      for(var i=pa.length-1;i>=0;i--){
+        var p=pa[i];
+        if(p.ty==="n"){
+          p.x+=p.vx;p.y+=p.vy;p.vy+=0.02;
+          var dx2=pl.x-p.x,dy2=pl.y-p.y;
+          if(dx2*dx2+dy2*dy2<(pl.r+p.sz*0.5)*(pl.r+p.sz*0.5)){colN(p);pa.splice(i,1);continue}
+        }else{
+          p.x+=p.vx;p.y+=p.vy;p.l-=p.d;if(p.l<=0)pa.splice(i,1)
+        }
+      }
+
+      for(var i=am.length-1;i>=0;i--){
+        var p=am[i];
+        p.x+=p.vx+Math.sin(performance.now()*0.001+p.an)*0.2;
+        p.y+=p.vy;p.an+=p.rs;
+        if(p.y>H+10){p.y=-10;p.x=Math.random()*W}
+      }
     }
-    if(st==="flower"){
-      peTi-=dt;if(peTi>0&&pe.length<80)spwPe(3);
-      for(var i=pe.length-1;i>=0;i--){var p=pe[i];p.x+=p.vx+Math.sin(p.so+performance.now()*p.sw)*0.5;p.y+=p.vy;p.an+=p.rs;if(p.y>H+20)pe.splice(i,1)}
-      if(peTi<=0&&pe.length===0)showMap()
+
+    if(st==="f"){
+      peTi-=dt;
+      if(peTi>0&&pe.length<60)spPe(2);
+      for(var i=pe.length-1;i>=0;i--){
+        var p=pe[i];
+        p.x+=p.vx+Math.sin(p.so+performance.now()*p.sw)*0.5;
+        p.y+=p.vy;p.an+=p.rs;
+        if(p.y>H+20)pe.splice(i,1)
+      }
+      if(peTi<=0&&pe.length===0)shM()
     }
   }
 
   function draw(){
-    var c=gc();ctx.clearRect(0,0,W,H);
-    ctx.strokeStyle=c.bd;ctx.lineWidth=0.5;ctx.globalAlpha=0.08;
-    for(var x=0;x<=W;x+=30){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
-    for(var y=0;y<=H;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
-    ctx.globalAlpha=1;
-    for(var i=0;i<bl.length;i++){var b=bl[i];ctx.save();ctx.translate(b.x+b.w/2,b.y+b.h/2);ctx.rotate(b.rot);ctx.fillStyle=b.co;ctx.globalAlpha=0.75;rrc(ctx,-b.w/2,-b.h/2,b.w,b.h,4);ctx.fill();ctx.globalAlpha=0.3;ctx.strokeStyle=c.bd;ctx.lineWidth=1;ctx.stroke();ctx.restore()}
-    for(var i=0;i<pt.length;i++){var p=pt[i];ctx.globalAlpha=p.l;ctx.fillStyle=p.co;ctx.beginPath();ctx.arc(p.x,p.y,p.sz*p.l,0,Math.PI*2);ctx.fill()}
-    ctx.globalAlpha=1;
-    if(st==="playing"){
-      var px=pl.x,py=pl.y,pr=pl.r;
-      var grd=ctx.createRadialGradient(px,py,0,px,py,pr*2.5);
-      var base=c.s1;var rgba=base.replace("rgb(","rgba(").replace(")",",0.2)");
-      grd.addColorStop(0,rgba.indexOf("rgba")!==-1?rgba:"rgba(200,168,124,0.2)");grd.addColorStop(1,"transparent");
-      ctx.fillStyle=grd;ctx.beginPath();ctx.arc(px,py,pr*2.5,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle=c.s1;ctx.globalAlpha=0.85;ctx.beginPath();ctx.arc(px,py,pr,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle=c.cd;ctx.globalAlpha=0.3;ctx.beginPath();ctx.arc(px-pr*0.25,py-pr*0.25,pr*0.4,0,Math.PI*2);ctx.fill()
+    var c=gc2();
+    CX.clearRect(0,0,W,H);
+
+    // Background tint per flower
+    var fi=LS[Math.min(liIdx,LS.length-1)].fi,fl=FC[fi];
+    CX.fillStyle=fl.c;CX.globalAlpha=0.02;CX.fillRect(0,0,W,H);CX.globalAlpha=1;
+
+    // Ambient petals
+    for(var i=0;i<am.length;i++){
+      var p=am[i];
+      CX.globalAlpha=p.al;CX.fillStyle=p.co;
+      CX.save();CX.translate(p.x,p.y);CX.rotate(p.an);
+      CX.beginPath();CX.ellipse(0,-p.sz*0.5,p.sz*0.3,p.sz*0.5,0,0,Math.PI*2);CX.fill();CX.restore()
     }
-    ctx.globalAlpha=1;
-    if(st==="flower"){for(var i=0;i<pe.length;i++){var p=pe[i];dp(ctx,p.x,p.y,p.sz,p.an,p.co,p.al)}}
+
+    // Enemies
+    CX.globalAlpha=1;
+    for(var i=0;i<en.length;i++){
+      var e=en[i];
+      dFE(e.tp,e.x,e.y,e.sz,e.co,e.dk,e.rt,e.fi)
+    }
+
+    // Nectar + particles
+    for(var i=0;i<pa.length;i++){
+      var p=pa[i];
+      if(p.ty==="n"){dNe(p.x,p.y,p.sz,p.co||fl.l)}
+      else{CX.globalAlpha=p.l;CX.fillStyle=p.co;CX.beginPath();CX.arc(p.x,p.y,p.sz*p.l,0,Math.PI*2);CX.fill()}
+    }
+
+    // Shield ring
+    if(shAc){
+      var t=performance.now()*0.005,lc=fl.l||c.gd;
+      for(var i=0;i<8;i++){
+        var a=i/8*Math.PI*2+t,r2=pl.r+6+Math.sin(t*3+i)*2;
+        CX.globalAlpha=0.4+Math.sin(t+i)*0.2;CX.strokeStyle=lc;CX.lineWidth=1.5;
+        CX.beginPath();CX.arc(pl.x,pl.y,r2,a,a+0.4);CX.stroke()
+      }
+      CX.globalAlpha=0.08;CX.fillStyle=lc;
+      CX.beginPath();CX.arc(pl.x,pl.y,pl.r+14,0,Math.PI*2);CX.fill()
+    }
+
+    // Player glow + body
+    var px=pl.x,py=pl.y,pr=pl.r;
+    var grd=CX.createRadialGradient(px,py,0,px,py,pr*3);
+    grd.addColorStop(0,"rgba(232,200,122,0.14)");grd.addColorStop(1,"transparent");
+    CX.fillStyle=grd;CX.beginPath();CX.arc(px,py,pr*3,0,Math.PI*2);CX.fill();
+    CX.fillStyle=fl.l||c.gd;CX.globalAlpha=0.9;
+    CX.beginPath();CX.arc(px,py,pr,0,Math.PI*2);CX.fill();
+    CX.fillStyle="#141228";CX.globalAlpha=0.25;
+    CX.beginPath();CX.arc(px-pr*0.2,py-pr*0.2,pr*0.35,0,Math.PI*2);CX.fill();
+
+    // Wings
+    var wt=performance.now()*0.003;
+    CX.globalAlpha=0.2;CX.fillStyle=fl.l||c.gd;
+    CX.save();CX.translate(px-pr*0.5,py);CX.scale(1,0.6+Math.sin(wt)*0.3);
+    CX.beginPath();CX.ellipse(0,0,pr*0.6,pr*0.5,0,0,Math.PI*2);CX.fill();CX.restore();
+    CX.save();CX.translate(px+pr*0.5,py);CX.scale(1,0.6+Math.sin(wt+Math.PI)*0.3);
+    CX.beginPath();CX.ellipse(0,0,pr*0.6,pr*0.5,0,0,Math.PI*2);CX.fill();CX.restore();
+
+    // Flower meter
+    CX.globalAlpha=0.4;CX.fillStyle=c.bd;CX.fillRect(14,H-18,96,6);
+    CX.globalAlpha=0.8;CX.fillStyle=fl.l||c.gd;
+    var fw=Math.min(nc,3)/3*96;
+    if(fw>0)CX.fillRect(14,H-18,fw,6);
+    CX.globalAlpha=0.3;CX.strokeStyle=c.bd;CX.lineWidth=0.5;
+    for(var i=1;i<=2;i++){
+      CX.beginPath();CX.moveTo(14+i*32,H-18);CX.lineTo(14+i*32,H-12);CX.stroke()
+    }
+    CX.globalAlpha=0.6;CX.fillStyle=c.mf;CX.font="9px sans-serif";
+    CX.textAlign="left";CX.textBaseline="top";CX.fillText("花灵",14,H-26);
+
+    // Charged indicator
+    if(caSh&&!shAc){
+      CX.globalAlpha=0.6+Math.sin(performance.now()*0.006)*0.3;
+      CX.strokeStyle=fl.l||c.gd;CX.lineWidth=1.5;
+      CX.beginPath();CX.arc(px,py,pr+8,0,Math.PI*2);CX.stroke()
+    }
+
+    // Combo
+    CX.globalAlpha=1;CX.fillStyle=c.mf;CX.font="10px sans-serif";
+    CX.textAlign="right";CX.textBaseline="bottom";
+    if(co>=2)CX.fillText("×"+co,W-14,H-14)
   }
 
-  function startLevel(idx,showIntro){
-    if(showIntro!==false){
-      st="intro";cancelAnimationFrame(aid);
-      var l=LEVELS[Math.min(idx,LEVELS.length-1)];
-      var f=FLOWER_TYPES[l.fi];
-      liNumber.textContent=LV[idx];
-      liFlower.textContent=f.name;
-      liPoem.textContent=POEMS[idx];
-      levelIntro.classList.add("show");
-      overlay.classList.add("hidden");
-      setTimeout(function(){
-        levelIntro.classList.remove("show");
-        setTimeout(function(){initLvl(idx);loop(performance.now())},500);
-      },1800);
-    }else{
-      initLvl(idx);loop(performance.now())
+  function colN(p){
+    co++;coTi=0;
+    var mu=co>=5?3:(co>=3?2:1);
+    sc+=5*mu;SE.textContent=sc;
+    if(sc>cb){cb=sc;localStorage.setItem("ddB",String(cb));BE.textContent=cb}
+    if(co>=2){CD.textContent="连击 ×"+co;CD.classList.remove("sh");void CD.offsetWidth;CD.classList.add("sh")}
+    nc++;
+    if(nc>=3&&!shAc){nc=0;caSh=true;SH.classList.add("sh")}
+    spEx(p.x,p.y,"#e8c87a",8)
+  }
+
+  function acSh(){
+    shAc=true;shTi=2000;caSh=false;SH.classList.remove("sh");
+    var co=FC[LS[Math.min(liIdx,LS.length-1)].fi].l;
+    for(var i=0;i<24;i++){
+      var a=i/24*Math.PI*2;
+      pa.push({x:pl.x,y:pl.y,vx:Math.cos(a)*2.5,vy:Math.sin(a)*2.5,l:1,d:0.03,sz:3+Math.random()*3,co:co,ty:"x"})
     }
   }
 
-  function onLvlDone(){
-    st="flower";cancelAnimationFrame(aid);timerBar.style.width="0%";
-    if(cl.indexOf(li)===-1){cl.push(li);save()}
-    var fs=sc;if(fs>cb){cb=fs;localStorage.setItem("ddBest",String(cb));bestEl.textContent=cb}
-    var l=LEVELS[Math.min(li,LEVELS.length-1)];var f=FLOWER_TYPES[l.fi];peTi=PD;pe=[];spwPe(60);
-    actionBtn.style.display="none";btnGroup.classList.add("hidden");
-    overlay.classList.remove("hidden");
-    overlayTitle.textContent="第"+(li+1)+"关 · 通关！";
-    overlaySub.innerHTML='<span style="font-size:14px;color:var(--gold);">'+f.name+'</span><br><span style="font-size:12px;color:var(--muted-fg);">得分：'+fs+'</span>';
-    loop(performance.now());
+  function onLD(){
+    st="f";cancelAnimationFrame(aid);TB.style.width="0%";
+    if(cl.indexOf(liIdx)===-1){cl.push(liIdx);sav()}
+    var fs=sc;
+    if(fs>cb){cb=fs;localStorage.setItem("ddB",String(cb));BE.textContent=cb}
+    var l=LS[Math.min(liIdx,LS.length-1)],f=FC[l.fi];
+    peTi=PD;pe=[];spPe(5);
+    AB.style.display="none";BG.classList.add("hd");
+    OV.classList.remove("hd");
+    OT.textContent="第"+(liIdx+1)+"花境 · 通关！";
+    OS.innerHTML="<span style=font-size:14px;color:#e8c87a;>"+f.n+"</span><br><span style=font-size:12px;color:#a89cc0;>花蜜："+fs+"</span>";
+    loop(performance.now())
   }
 
-  function showMap(){
-    st="map";cancelAnimationFrame(aid);pe=[];
-    actionBtn.style.display="";btnGroup.classList.add("hidden");
-    overlay.classList.remove("hidden");overlayTitle.textContent="江湖路";
-    var h='<div class="level-map"><div class="level-map-path">';
+  function shM(){
+    st="m";cancelAnimationFrame(aid);pe=[];
+    AB.style.display="";BG.classList.add("hd");
+    OV.classList.remove("hd");OT.textContent="江湖路";
+    var h="<div class=lm><div class=lp>";
     for(var i=0;i<tl;i++){
-      var ic=cl.indexOf(i)!==-1;var icr=i===li;
-      var md=cl.length?Math.max.apply(null,cl):-1;var iu=ic||i===0||cl.indexOf(i-1)!==-1||i<=md+1;
-      var cls="level-map-node";if(ic)cls+=" completed";else if(icr)cls+=" current";else if(iu)cls+=" unlocked";else cls+=" locked";
-      var lv=LEVELS[i];var f=FLOWER_TYPES[lv.fi];
-      var ch=ic?'<span class="check-mark"><svg viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12"/></svg></span>':'';
-      h+='<div class="level-map-row">';
-      h+='<button class="'+cls+'" data-lvl="'+i+'" '+(iu?'':'disabled')+'>'+(i+1)+ch+'</button>';
-      h+='<span style="font-size:11px;color:var(--muted-fg);text-align:left;flex:1;">'+f.name+'</span>';
-      h+='</div>';
-      if(i<tl-1){var cc=ic?"level-map-connector done":(iu?"level-map-connector partial":"level-map-connector");h+='<div class="'+cc+'"></div>'}
+      var ic=cl.indexOf(i)!==-1,icr=i===liIdx;
+      var md=cl.length?Math.max.apply(null,cl):-1,iu=ic||i===0||cl.indexOf(i-1)!==-1||i<=md+1;
+      var cls="ln";if(ic)cls+=" co";else if(icr)cls+=" cu";else if(iu)cls+=" un";else cls+=" lo";
+      var lv=LS[i],f=FC[lv.fi];
+      var ch=ic?"<span class=cm><svg viewBox='0 0 24 24' fill='none'><polyline points='20 6 9 17 4 12'/></svg></span>":"";
+      h+="<div class=lr><button class="+cls+" data-l="+i+" "+(iu?"":"disabled")+">"+(i+1)+ch+"</button>";
+      h+="<span style=font-size:11px;color:#a89cc0;text-align:left;flex:1;>"+f.n+"</span></div>";
+      if(i<tl-1){
+        var cc=ic?"lc do":(iu?"lc pa":"lc");
+        h+="<div class="+cc+"></div>"
+      }
     }
-    h+='</div></div>';overlaySub.innerHTML=h;
-    var ni=li+1;
-    if(ni<tl&&(cl.indexOf(ni)!==-1||cl.indexOf(li)!==-1)){actionBtn.textContent="第"+(ni+1)+"关";actionBtn.dataset.tgt=ni}
-    else{actionBtn.textContent="第"+(li+1)+"关（重玩）";actionBtn.dataset.tgt=li}
+    h+="</div></div>";OS.innerHTML=h;
+    var ni=liIdx+1;
+    if(ni<tl&&(cl.indexOf(ni)!==-1||cl.indexOf(liIdx)!==-1)){
+      AB.textContent="第"+(ni+1)+"花境";AB.dataset.t=ni
+    }else{
+      AB.textContent="第"+(liIdx+1)+"花境（重游）";AB.dataset.t=liIdx
+    }
     requestAnimationFrame(function(){
-      var nd=overlaySub.querySelectorAll(".level-map-node.unlocked,.level-map-node.completed,.level-map-node.current");
-      for(var i=0;i<nd.length;i++){(function(b){b.addEventListener("click",function(){var l=parseInt(b.dataset.lvl,10);if(!isNaN(l)&&l>=0&&l<tl)startLevel(l,true)})})(nd[i])}
-      var st=overlaySub.querySelector(".level-map-node.current")||overlaySub.querySelector(".level-map-node.completed:last-child");
+      var nd=OS.querySelectorAll(".ln.un,.ln.co,.ln.cu");
+      for(var i=0;i<nd.length;i++){
+        (function(b){
+          b.addEventListener("click",function(){
+            var l=parseInt(b.dataset.l,10);
+            if(!isNaN(l)&&l>=0&&l<tl)sL(l,true)
+          })
+        })(nd[i])
+      }
+      var st=OS.querySelector(".ln.cu")||OS.querySelector(".ln.co:last-child");
       if(st)st.scrollIntoView({block:"center",behavior:"smooth"})
     })
   }
 
   function onGO(){
-    st="go";cancelAnimationFrame(aid);timerBar.style.width="0%";
-    var nb=sc>cb;if(nb){cb=sc;localStorage.setItem("ddBest",String(cb));bestEl.textContent=cb}
-    overlay.classList.remove("hidden");overlayTitle.textContent="败阵";
-    overlaySub.innerHTML="第"+(li+1)+"关 · 得分 <span class=\"final-score\">"+sc+"</span>"+(nb?"<br><span class=\"new-best\">✦ 新纪录 ✦</span>":"");
-    if(li===0){actionBtn.style.display="";actionBtn.textContent="重试";actionBtn.dataset.tgt=li;btnGroup.classList.add("hidden")}
-    else{actionBtn.style.display="none";btnGroup.classList.remove("hidden");retryBtn.dataset.tgt=li;mapBtn.dataset.tgt=li}
+    st="g";cancelAnimationFrame(aid);TB.style.width="0%";
+    var nb=sc>cb;
+    if(nb){cb=sc;localStorage.setItem("ddB",String(cb));BE.textContent=cb}
+    OV.classList.remove("hd");OT.textContent="花落";
+    OS.innerHTML="第"+(liIdx+1)+"花境 · 花蜜 <span class=fs>"+sc+"</span>"+(nb?"<br><span class=nb>✦ 新纪录 ✦</span>":"");
+    if(liIdx===0){
+      AB.style.display="";AB.textContent="重试";AB.dataset.t=liIdx;BG.classList.add("hd")
+    }else{
+      AB.style.display="none";BG.classList.remove("hd");RB.dataset.t=liIdx;MB.dataset.t=liIdx
+    }
   }
+
+  function sL(idx,si2){
+    if(si2!==false&&idx>0){
+      st="i";cancelAnimationFrame(aid);skSh=false;SK.classList.remove("sh");
+      var l=LS[Math.min(idx,LS.length-1)],f=FC[l.fi];
+      LN.textContent=LV[idx];LF.textContent=f.n;LP.textContent=PO[idx];
+      LI.classList.add("sh");OV.classList.add("hd");
+      setTimeout(function(){if(!skSh)SK.classList.add("sh")},1000);
+      var tm=setTimeout(function(){
+        SK.classList.remove("sh");LI.classList.remove("sh");
+        setTimeout(function(){if(st==="i"){clearTimeout(tm);iL(idx);loop(performance.now())}},400)
+      },2400);
+      SK._tm=tm
+    }else{iL(idx);loop(performance.now())}
+  }
+
+  SK.addEventListener("click",function(){
+    if(st==="i"&&!skSh)return;
+    if(st==="i"){
+      clearTimeout(SK._tm);SK.classList.remove("sh");LI.classList.remove("sh");
+      setTimeout(function(){iL(liIdx);loop(performance.now())},400)
+    }
+  })
+
+  CV.addEventListener("click",function(){if(caSh&&!shAc)acSh()})
 
   var lt=0;
   function loop(t){
-    if(st==="map"||st==="go"||st==="menu"||st==="intro")return;
+    if(st==="m"||st==="g"||st==="menu"||st==="i")return;
     var dt=Math.min(t-lt,50);lt=t;upd(dt);
-    if(st==="playing"||st==="flower"){draw();aid=requestAnimationFrame(loop)}
+    if(st==="p"||st==="f"){draw();aid=requestAnimationFrame(loop)}
   }
 
-  function showMenu(){
-    st="menu";cancelAnimationFrame(aid);timerBar.style.width="100%";ctx.fillStyle="rgba(200,168,124,0.04)";ctx.font="40px serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("❀",200,100);
-    actionBtn.style.display="";actionBtn.textContent="开始闯关";actionBtn.dataset.tgt="0";
-    btnGroup.classList.add("hidden");overlay.classList.remove("hidden");
-    overlayTitle.textContent="花雨落";
-    overlaySub.innerHTML="每关十五息，落块如飞雨<br>十大险关，步步惊心";
-    levelDisplay.textContent="1";ctx.clearRect(0,0,W,H);ctx.fillStyle="rgba(200,168,124,0.06)";ctx.font="16px serif";ctx.textAlign="center";ctx.fillText("✦",200,230);
-    levelIntro.classList.remove("show");
+  function shMenu(){
+    st="menu";cancelAnimationFrame(aid);TB.style.width="100%";
+    AB.style.display="";AB.textContent="开始闯关";AB.dataset.t="0";
+    BG.classList.add("hd");OV.classList.remove("hd");
+    OT.textContent="花灵 · 花雨落";
+    OS.innerHTML="采集花蜜，躲避花敌<br>十大花境，步步惊心";
+    LD.textContent="1";CX.clearRect(0,0,W,H);
+    LI.classList.remove("sh");SK.classList.remove("sh");
+    CX.globalAlpha=0.06;
+    for(var i=0;i<10;i++){dBF(40+i*35,120+Math.sin(i)*50,25,i,i*0.5,0.06)}
+    CX.globalAlpha=1
   }
 
-  document.addEventListener("keydown",function(e){ke[e.code]=true;if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Space"].indexOf(e.code)!==-1)e.preventDefault()})
-  document.addEventListener("keyup",function(e){ke[e.code]=false})
-
-  var pid=null;
-  function hp(clientX){
-    if(st!=="playing")return;
-    var r=canvas.getBoundingClientRect();var sx=W/r.width;var rx=(clientX-r.left)*sx;
+  function hp(x){
+    if(st!=="p")return;
+    var r=CV.getBoundingClientRect(),sx=W/r.width,rx=(x-r.left)*sx;
     if(rx>=0&&rx<=W)pl.x=Math.max(pl.r,Math.min(W-pl.r,rx))
   }
-  canvas.addEventListener("mousedown",function(e){hp(e.clientX,e.clientY)})
-  canvas.addEventListener("mousemove",function(e){if(e.buttons>0)hp(e.clientX,e.clientY)})
 
-  canvas.addEventListener("touchstart",function(e){
-    e.preventDefault();var t=e.touches[0];pid=t.identifier;hp(t.clientX,t.clientY)
-  },{passive:false});
-  canvas.addEventListener("touchmove",function(e){
-    e.preventDefault();
-    for(var i=0;i<e.touches.length;i++){
-      if(pid===null||e.touches[i].identifier===pid){hp(e.touches[i].clientX,e.touches[i].clientY);pid=e.touches[i].identifier;break}
-    }
-  },{passive:false});
-  canvas.addEventListener("touchend",function(){pid=null},{passive:true})
-  canvas.addEventListener("touchcancel",function(){pid=null},{passive:true})
+  document.addEventListener("keydown",function(e){
+    ke[e.code]=true;
+    if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Space"].indexOf(e.code)!==-1)e.preventDefault()
+  });
+  document.addEventListener("keyup",function(e){ke[e.code]=false});
 
-  actionBtn.addEventListener("click",function(){
-    var t=parseInt(actionBtn.dataset.tgt,10);
+  CV.addEventListener("mousedown",function(e){hp(e.clientX)});
+  CV.addEventListener("mousemove",function(e){if(e.buttons>0)hp(e.clientX)});
+  CV.addEventListener("touchstart",function(e){
+    e.preventDefault();hp(e.touches[0].clientX);
+    if(caSh&&!shAc)acSh()
+  },{passive:false});
+  CV.addEventListener("touchmove",function(e){e.preventDefault();hp(e.touches[0].clientX)},{passive:false});
+
+  AB.addEventListener("click",function(){
+    var t=parseInt(AB.dataset.t,10);
     if(!isNaN(t)&&t>=0&&t<tl){
-      overlay.classList.add("hidden");
-      initLvl(t);
-      loop(performance.now());
-    }else{showMenu()}
-  })
-  retryBtn.addEventListener("click",function(){var t=parseInt(retryBtn.dataset.tgt,10);if(!isNaN(t))startLevel(t,false)})
-  mapBtn.addEventListener("click",function(){showMap()})
+      OV.classList.add("hd");iL(t);loop(performance.now())
+    }else shMenu()
+  });
+  RB.addEventListener("click",function(){
+    var t=parseInt(RB.dataset.t,10);
+    if(!isNaN(t)){OV.classList.add("hd");iL(t);loop(performance.now())}
+  });
+  MB.addEventListener("click",function(){shM()});
 
-  showMenu()
+  shMenu()
 })();
 </script>
 </body>
