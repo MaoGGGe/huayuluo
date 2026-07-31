@@ -73,12 +73,19 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 #gr .fs{font-size:30px;font-weight:600;color:var(--gold)}
 #gr .nb{font-size:10px;letter-spacing:2px;color:var(--gold);animation:pb 0.6s ease-in-out infinite alternate}
 @keyframes pb{from{opacity:0.5}to{opacity:1}}
-#gr .lm{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;width:100%;max-height:430px;overflow-y:auto}
+#gr .lm{display:block;width:100%;height:100%;overflow-y:auto;overscroll-behavior:contain;
+  scroll-snap-type:y mandatory;-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
 #gr .lm::-webkit-scrollbar{width:0}
-#gr .lp{display:flex;flex-direction:column;align-items:center;gap:0;width:100%;padding:0 8px}
-#gr .lr{display:flex;align-items:center;gap:12px;width:100%;justify-content:center}
-#gr .ln{width:42px;height:42px;min-width:42px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.16);
-  background:rgba(255,255,255,0.05);color:var(--mf);font-family:inherit;font-size:13px;font-weight:500;cursor:default;
+#gr .lp{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;padding:46px 10px}
+#gr .lr{scroll-snap-align:center;scroll-snap-stop:always;flex-shrink:0;
+  display:flex;align-items:center;gap:14px;width:100%;max-width:340px;min-height:66px;
+  padding:10px 16px;margin:4px auto;border-radius:20px;
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.13);
+  box-shadow:0 6px 20px rgba(0,0,0,0.14),inset 0 1px 0 rgba(255,255,255,0.1);
+  transition:transform 0.25s cubic-bezier(0.2,0.8,0.2,1),border-color 0.25s,background 0.25s}
+#gr .lr:active{transform:scale(0.985)}
+#gr .ln{width:44px;height:44px;min-width:44px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.16);
+  background:rgba(255,255,255,0.05);color:var(--mf);font-family:inherit;font-size:14px;font-weight:500;cursor:default;
   display:flex;align-items:center;justify-content:center;transition:all 0.3s;position:relative;flex-shrink:0;
   -webkit-tap-highlight-color:transparent;touch-action:manipulation;box-shadow:inset 0 1px 0 rgba(255,255,255,0.1)}
 #gr .ln.co{border-color:rgba(232,200,122,0.55);background:rgba(232,200,122,0.12);color:var(--gold)}
@@ -90,7 +97,13 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 #gr .ln .cm{position:absolute;top:-3px;right:-3px;width:15px;height:15px;background:linear-gradient(135deg,#e8c87a,#d7b36a);
   border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(232,200,122,0.3)}
 #gr .ln .cm svg{width:8px;height:8px;stroke:#201a2c;stroke-width:3.5}
-#gr .lc{width:2px;height:14px;background:rgba(255,255,255,0.12);margin:0 auto;flex-shrink:0}
+#gr .lri{flex:1;min-width:0;text-align:left}
+#gr .lrn{font-size:13px;font-weight:500;color:var(--fg);letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#gr .lrp{font-size:10px;color:var(--gd2);letter-spacing:1px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#gr .lrs{font-size:16px;min-width:24px;text-align:center}
+#gr .lrs.ck{color:var(--gold)}
+#gr .lrs.lk{color:rgba(255,255,255,0.25)}
+#gr .lc{width:2px;height:12px;background:rgba(255,255,255,0.12);margin:0 auto;flex-shrink:0}
 #gr .lc.do{background:rgba(232,200,122,0.45)}
 #gr .lc.pa{background:linear-gradient(to bottom,rgba(232,200,122,0.45) 50%,rgba(255,255,255,0.12) 50%)}
 @keyframes np{0%,100%{box-shadow:0 0 0 3px rgba(232,200,122,0.18),0 8px 24px rgba(232,200,122,0.25)}50%{box-shadow:0 0 0 6px rgba(232,200,122,0.12),0 14px 34px rgba(232,200,122,0.18)}}
@@ -114,7 +127,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
 #gr .shh{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:6;font-size:10px;letter-spacing:2px;
   color:var(--gold);opacity:0;transition:opacity 0.3s;pointer-events:none;text-shadow:0 2px 12px rgba(232,200,122,0.35)}
 #gr .shh.sh{opacity:1}
-@media(max-width:440px){#gr{padding:8px 10px;gap:6px}#gr .oc{padding:14px;gap:8px;border-radius:18px}#gr .ot{font-size:22px}#gr .sv{font-size:15px;min-width:26px}#gr .sl{font-size:9px}#gr .hg{padding:4px 8px;border-radius:12px}#gr .ln{width:36px;height:36px;min-width:36px;font-size:12px}#gr .lc{height:11px}#gr .lm{max-height:70dvh}#gr .lii .lnum{font-size:44px}}
+@media(max-width:440px){#gr{padding:8px 10px;gap:6px}#gr .oc{padding:14px;gap:8px;border-radius:18px}#gr .ot{font-size:22px}#gr .sv{font-size:15px;min-width:26px}#gr .sl{font-size:9px}#gr .hg{padding:4px 8px;border-radius:12px}#gr .ln{width:36px;height:36px;min-width:36px;font-size:12px}#gr .lc{height:11px}#gr .lm{height:100%}#gr .lii .lnum{font-size:44px}}
 @media(max-width:360px){#gr .ot{font-size:19px}#gr .obtn{font-size:13px;padding:8px 22px}#gr .ln{width:31px;height:31px;min-width:31px;font-size:11px}#gr .lii .lnum{font-size:36px}}
 </style>
 </head>
@@ -137,6 +150,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
         <div class="dv"></div>
         <p id="os" class="os">采集花蜜，躲避花敌<br>十大花境，步步惊心</p>
         <button id="ab" class="obtn pr">开始闯关</button>
+        <button id="mm" class="obtn" style="padding:6px 18px;font-size:12px;margin-top:-4px">闯关地图</button>
         <div id="bg" class="bg hd">
           <button id="rb" class="obtn pr">重试本关</button>
           <button id="mb" class="obtn">闯关地图</button>
@@ -157,7 +171,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   var R=document.getElementById("gr"),CV=document.getElementById("cv"),CX=CV.getContext("2d");
   var OV=document.getElementById("ov"),OT=document.getElementById("ot"),OS=document.getElementById("os");
   var AB=document.getElementById("ab"),RB=document.getElementById("rb"),MB=document.getElementById("mb");
-  var BG=document.getElementById("bg"),SE=document.getElementById("se"),BE=document.getElementById("be");
+  var BG=document.getElementById("bg"),SE=document.getElementById("se"),BE=document.getElementById("be"),MM=document.getElementById("mm");
   var LD=document.getElementById("ld"),TB=document.getElementById("tb");
   var LI=document.getElementById("lii"),LN=document.getElementById("lnum"),LF=document.getElementById("lf");
   var LP=document.getElementById("lpo"),SK=document.getElementById("sk");
@@ -357,7 +371,7 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
     sc=0;si=0;di=0;lvTi=LT*1000;peTi=0;neTi=0;
     co=0;coTi=0;nc=0;caSh=false;shAc=false;shTi=0;skSh=false;
     SE.textContent="0";LD.textContent=idx+1;
-    AB.style.display="";BG.classList.add("hd");
+    AB.style.display="";MM.style.display="none";BG.classList.add("hd");
     OV.classList.add("hd");LI.classList.remove("sh");
     SK.classList.remove("sh");CD.classList.remove("sh");SH.classList.remove("sh");
     st="p";spAm()
@@ -591,29 +605,25 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
 
   function shM(){
     st="m";cancelAnimationFrame(aid);pe=[];
-    AB.style.display="";BG.classList.add("hd");
+    AB.style.display="";MM.style.display="none";BG.classList.add("hd");
     OV.classList.remove("hd");OT.textContent="江湖路";
     var h="<div class=lm><div class=lp>";
     for(var i=0;i<tl;i++){
       var ic=cl.indexOf(i)!==-1,icr=i===liIdx;
       var md=cl.length?Math.max.apply(null,cl):-1,iu=ic||i===0||cl.indexOf(i-1)!==-1||i<=md+1;
       var cls="ln";if(ic)cls+=" co";else if(icr)cls+=" cu";else if(iu)cls+=" un";else cls+=" lo";
-      var lv=LS[i],f=FC[lv.fi];
+      var f=FC[LS[i].fi];
       var ch=ic?"<span class=cm><svg viewBox='0 0 24 24' fill='none'><polyline points='20 6 9 17 4 12'/></svg></span>":"";
+      var st2=ic?"<span class=lrs ck>✓</span>":(iu?"<span class=lrs></span>":"<span class=lrs lk>🔒</span>");
       h+="<div class=lr><button class="+cls+" data-l="+i+" "+(iu?"":"disabled")+">"+(i+1)+ch+"</button>";
-      h+="<span style=font-size:11px;color:#a89cc0;text-align:left;flex:1;>"+f.n+"</span></div>";
+      h+="<div class=lri><div class=lrn>"+f.n+" · 第"+LV[i]+"花境</div><div class=lrp>"+PO[i]+"</div></div>";
+      h+=st2+"</div>";
       if(i<tl-1){
         var cc=ic?"lc do":(iu?"lc pa":"lc");
         h+="<div class="+cc+"></div>"
       }
     }
     h+="</div></div>";OS.innerHTML=h;
-    var ni=liIdx+1;
-    if(ni<tl&&(cl.indexOf(ni)!==-1||cl.indexOf(liIdx)!==-1)){
-      AB.textContent="第"+(ni+1)+"花境";AB.dataset.t=ni
-    }else{
-      AB.textContent="第"+(liIdx+1)+"花境（重游）";AB.dataset.t=liIdx
-    }
     requestAnimationFrame(function(){
       var nd=OS.querySelectorAll(".ln.un,.ln.co,.ln.cu");
       for(var i=0;i<nd.length;i++){
@@ -625,7 +635,10 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
         })(nd[i])
       }
       var st=OS.querySelector(".ln.cu")||OS.querySelector(".ln.co:last-child");
-      if(st)st.scrollIntoView({block:"center",behavior:"smooth"})
+      if(st){
+        var card=st.closest(".lr");
+        if(card)card.scrollIntoView({block:"center",behavior:"smooth"})
+      }
     })
   }
 
@@ -633,7 +646,7 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
     st="g";cancelAnimationFrame(aid);TB.style.width="0%";
     var nb=sc>cb;
     if(nb){cb=sc;localStorage.setItem("ddB",String(cb));BE.textContent=cb}
-    OV.classList.remove("hd");OT.textContent="花落";
+    MM.style.display="none";OV.classList.remove("hd");OT.textContent="花落";
     OS.innerHTML="第"+(liIdx+1)+"花境 · 花蜜 <span class=fs>"+sc+"</span>"+(nb?"<br><span class=nb>✦ 新纪录 ✦</span>":"");
     if(liIdx===0){
       AB.style.display="";AB.textContent="重试";AB.dataset.t=liIdx;BG.classList.add("hd")
@@ -650,7 +663,7 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
     CX.fillStyle=fl.c;CX.globalAlpha=0.05;CX.fillRect(0,0,W,H);CX.globalAlpha=1;
     var el=(t-seaSt)/1000;
     if(el>1.3)return;
-    var p=Math.min(1,el/1.0),cx=W/2,cy=H*0.42,maxD=Math.max(W,H)*0.55;
+    var p=Math.min(1,el/2.5),cx=W/2,cy=H*0.42,maxD=Math.max(W,H)*0.6;
     CX.strokeStyle="rgba(255,255,255,0.07)";CX.lineWidth=1;
     for(var i=0;i<28;i++){
       var a=i/28*Math.PI*2;
@@ -679,11 +692,11 @@ function sL(idx,si2){
         seaFl.push({an:Math.random()*Math.PI*2,sz:10+Math.random()*20,rt:Math.random()*Math.PI*2,rs:(Math.random()-0.5)*0.18,fi:l.fi,al:0.45+Math.random()*0.45,sp:0.55+Math.random()*0.55});
       }
       loop(performance.now());
-      setTimeout(function(){if(!skSh)SK.classList.add("sh")},650);
+      setTimeout(function(){if(!skSh)SK.classList.add("sh")},1200);
       var tm=setTimeout(function(){
         SK.classList.remove("sh");LI.classList.remove("sh");
         setTimeout(function(){if(st==="i"){clearTimeout(tm);iL(idx);loop(performance.now())}},380)
-      },1350);
+      },2500);
       SK._tm=tm
     }else{iL(idx);loop(performance.now())}
   }
@@ -710,7 +723,7 @@ function sL(idx,si2){
   function shMenu(){
     st="menu";cancelAnimationFrame(aid);TB.style.width="100%";
     AB.style.display="";AB.textContent="开始闯关";AB.dataset.t="0";
-    BG.classList.add("hd");OV.classList.remove("hd");
+    MM.style.display="";BG.classList.add("hd");OV.classList.remove("hd");
     OT.textContent="花灵 · 花雨落";
     OS.innerHTML="采集花蜜，躲避花敌<br>十大花境，步步惊心";
     LD.textContent="1";CX.clearRect(0,0,W,H);
@@ -752,6 +765,7 @@ function sL(idx,si2){
     if(!isNaN(t)){OV.classList.add("hd");iL(t);loop(performance.now())}
   });
   MB.addEventListener("click",function(){shM()});
+  MM.addEventListener("click",function(){shM()});
 
   resizeCv();
   shMenu()
