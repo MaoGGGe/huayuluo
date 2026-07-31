@@ -163,7 +163,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
   var LP=document.getElementById("lpo"),SK=document.getElementById("sk");
   var CD=document.getElementById("cd"),SH=document.getElementById("shh");
 
-  var W=400,H=500,PS=11,LT=15,PD=4000,CW_EL=document.getElementById("cw"),DPR=window.devicePixelRatio||1;
+  var W=400,H=500,PS=11,LT=15,PD=2000,CW_EL=document.getElementById("cw"),DPR=window.devicePixelRatio||1;
   var LV=["一","二","三","四","五","六","七","八","九","十"];
   var PO=["雪落无声，暗香浮动","落英缤纷，刹那芳华","凌寒独放，傲骨铮铮","人面桃花，相映成红","紫雾弥漫，幽香满怀","心向骄阳，灿烂如初","出淤不染，濯涟不妖","金粟满枝，十里飘香","待到秋来，我花开后","带刺柔情，红颜如血"];
   var FC=[
@@ -184,7 +184,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
     {sp:3.0,iv:460,fi:8},{sp:3.5,iv:400,fi:9}
   ];
   var pl,en,pa,pe,sc,st,aid,si,di,lvTi,liIdx,ke={},tl=LS.length,cl=[],peTi=0,neTi=0,am=[];
-  var caSh=false,shAc=false,shTi=0,co=0,coTi=0,coTo=3000,nc=0,skSh=false;
+  var caSh=false,shAc=false,shTi=0,co=0,coTi=0,coTo=3000,nc=0,skSh=false,seaFl=[],seaSt=0;
   var cb=parseInt(localStorage.getItem("ddB")||"0",10);
   var sp=(localStorage.getItem("ddP")||"").split(",").filter(Boolean).map(Number);
   cl=sp;BE.textContent=cb;
@@ -580,7 +580,9 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
     if(fs>cb){cb=fs;localStorage.setItem("ddB",String(cb));BE.textContent=cb}
     var l=LS[Math.min(liIdx,LS.length-1)],f=FC[l.fi];
     peTi=PD;pe=[];spPe(5);
-    AB.style.display="none";BG.classList.add("hd");
+    AB.style.display="";BG.classList.add("hd");
+    if(liIdx<tl-1){AB.textContent="下一关 · "+FC[liIdx+1].n;AB.dataset.t=liIdx+1}
+    else{AB.textContent="闯关地图";AB.dataset.t="map"}
     OV.classList.remove("hd");
     OT.textContent="第"+(liIdx+1)+"花境 · 通关！";
     OS.innerHTML="<span style=font-size:14px;color:#e8c87a;>"+f.n+"</span><br><span style=font-size:12px;color:#a89cc0;>花蜜："+fs+"</span>";
@@ -640,17 +642,48 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
     }
   }
 
-  function sL(idx,si2){
+  
+  function drawSea(t){
+    CX.clearRect(0,0,W,H);
+    var fi=LS[Math.min(liIdx,LS.length-1)].fi,fl=FC[fi];
+    CX.fillStyle="#0a0a18";CX.fillRect(0,0,W,H);
+    CX.fillStyle=fl.c;CX.globalAlpha=0.05;CX.fillRect(0,0,W,H);CX.globalAlpha=1;
+    var el=(t-seaSt)/1000;
+    if(el>1.3)return;
+    var p=Math.min(1,el/1.0),cx=W/2,cy=H*0.42,maxD=Math.max(W,H)*0.55;
+    CX.strokeStyle="rgba(255,255,255,0.07)";CX.lineWidth=1;
+    for(var i=0;i<28;i++){
+      var a=i/28*Math.PI*2;
+      CX.beginPath();
+      CX.moveTo(cx+Math.cos(a)*p*20,cy+Math.sin(a)*p*20);
+      CX.lineTo(cx+Math.cos(a)*(20+p*maxD*0.8),cy+Math.sin(a)*(20+p*maxD*0.8));
+      CX.stroke()
+    }
+    for(var i=0;i<seaFl.length;i++){
+      var sf=seaFl[i],d=p*maxD*sf.sp;
+      var x=cx+Math.cos(sf.an)*d,y=cy+Math.sin(sf.an)*d;
+      var sc=0.15+p*0.85,al=sf.al*(1-p*0.75);
+      if(al>0.02&&x>-40&&x<W+40&&y>-40&&y<H+40)dBF(x,y,sf.sz*sc,sf.fi,sf.rt+p*sf.rs*3,al);
+    }
+    CX.globalAlpha=1
+  }
+
+function sL(idx,si2){
     if(si2!==false&&idx>0){
       st="i";cancelAnimationFrame(aid);skSh=false;SK.classList.remove("sh");
       var l=LS[Math.min(idx,LS.length-1)],f=FC[l.fi];
       LN.textContent=LV[idx];LF.textContent=f.n;LP.textContent=PO[idx];
       LI.classList.add("sh");OV.classList.add("hd");
-      setTimeout(function(){if(!skSh)SK.classList.add("sh")},1000);
+      seaFl=[];seaSt=performance.now();
+      for(var i=0;i<38;i++){
+        seaFl.push({an:Math.random()*Math.PI*2,sz:10+Math.random()*20,rt:Math.random()*Math.PI*2,rs:(Math.random()-0.5)*0.18,fi:l.fi,al:0.45+Math.random()*0.45,sp:0.55+Math.random()*0.55});
+      }
+      loop(performance.now());
+      setTimeout(function(){if(!skSh)SK.classList.add("sh")},650);
       var tm=setTimeout(function(){
         SK.classList.remove("sh");LI.classList.remove("sh");
-        setTimeout(function(){if(st==="i"){clearTimeout(tm);iL(idx);loop(performance.now())}},400)
-      },2400);
+        setTimeout(function(){if(st==="i"){clearTimeout(tm);iL(idx);loop(performance.now())}},380)
+      },1350);
       SK._tm=tm
     }else{iL(idx);loop(performance.now())}
   }
@@ -667,8 +700,10 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
 
   var lt=0;
   function loop(t){
-    if(st==="m"||st==="g"||st==="menu"||st==="i")return;
-    var dt=Math.min(t-lt,50);lt=t;upd(dt);
+    if(st==="m"||st==="g"||st==="menu")return;
+    var dt=Math.min(t-lt,50);lt=t;
+    if(st==="i"){drawSea(t);aid=requestAnimationFrame(loop);return}
+    upd(dt);
     if(st==="p"||st==="f"){draw();aid=requestAnimationFrame(loop)}
   }
 
@@ -708,8 +743,9 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
   AB.addEventListener("click",function(){
     var t=parseInt(AB.dataset.t,10);
     if(!isNaN(t)&&t>=0&&t<tl){
-      OV.classList.add("hd");iL(t);loop(performance.now())
-    }else shMenu()
+      if(st==="f"){sL(t,true)}else{OV.classList.add("hd");iL(t);loop(performance.now())}
+    }else if(AB.dataset.t==="map"){shM()}
+    else shMenu()
   });
   RB.addEventListener("click",function(){
     var t=parseInt(RB.dataset.t,10);
