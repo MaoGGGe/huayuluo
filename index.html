@@ -329,12 +329,18 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
 
   function dNe(x,y,sz,co){
     CX.save();CX.translate(x,y);
-    var g=CX.createRadialGradient(0,0,0,0,0,sz);
-    g.addColorStop(0,co||"#ffe082");g.addColorStop(1,"#cc8800");
-    CX.fillStyle=g;CX.globalAlpha=0.9;
-    CX.beginPath();CX.ellipse(0,0,sz*0.4,sz*0.55,0,0,Math.PI*2);CX.fill();
-    CX.fillStyle="#fff";CX.globalAlpha=0.25;
-    CX.beginPath();CX.arc(-sz*0.12,-sz*0.15,sz*0.1,0,Math.PI*2);CX.fill();
+    var glow=CX.createRadialGradient(0,0,0,0,0,sz*2.4);
+    glow.addColorStop(0,"rgba(90,180,255,0.4)");
+    glow.addColorStop(1,"rgba(90,180,255,0)");
+    CX.fillStyle=glow;CX.globalAlpha=0.6+Math.sin(performance.now()*0.006+y)*0.2;
+    CX.beginPath();CX.arc(0,0,sz*2.4,0,Math.PI*2);CX.fill();
+    CX.globalAlpha=1;
+    var g=CX.createRadialGradient(-sz*0.1,-sz*0.15,0,0,0,sz);
+    g.addColorStop(0,"#aee2ff");g.addColorStop(0.5,"#5aa9ff");g.addColorStop(1,"#2f6bff");
+    CX.fillStyle=g;CX.globalAlpha=0.95;
+    CX.beginPath();CX.ellipse(0,0,sz*0.42,sz*0.58,0,0,Math.PI*2);CX.fill();
+    CX.fillStyle="rgba(255,255,255,0.55)";
+    CX.beginPath();CX.arc(-sz*0.12,-sz*0.18,sz*0.12,0,Math.PI*2);CX.fill();
     CX.restore()
   }
 
@@ -372,9 +378,8 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
   }
 
   function spN(){
-    var fi=LS[Math.min(liIdx,LS.length-1)].fi,co=FC[fi].l;
     var x=20+Math.random()*(W-40),sz=5+Math.random()*3;
-    pa.push({x:x,y:-10,sz:sz,vy:0.4+Math.random()*0.3,vx:(Math.random()-0.5)*0.3,co:co,ty:"n"})
+    pa.push({x:x,y:-10,sz:sz,vy:0.4+Math.random()*0.3,vx:(Math.random()-0.5)*0.3,co:"#5aa9ff",ty:"n"})
   }
 
   function spEx(x,y,co,n){
@@ -483,7 +488,7 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
     // Nectar + particles
     for(var i=0;i<pa.length;i++){
       var p=pa[i];
-      if(p.ty==="n"){dNe(p.x,p.y,p.sz,p.co||fl.l)}
+      if(p.ty==="n"){dNe(p.x,p.y,p.sz,p.co||"#5aa9ff")}
       else{CX.globalAlpha=p.l;CX.fillStyle=p.co;CX.beginPath();CX.arc(p.x,p.y,p.sz*p.l,0,Math.PI*2);CX.fill()}
     }
 
@@ -550,7 +555,7 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
     if(co>=2){CD.textContent="连击 ×"+co;CD.classList.remove("sh");void CD.offsetWidth;CD.classList.add("sh")}
     nc++;
     if(nc>=3&&!shAc){nc=0;caSh=true;SH.classList.add("sh")}
-    spEx(p.x,p.y,"#e8c87a",8)
+    spEx(p.x,p.y,"#5aa9ff",10)
   }
 
   function acSh(){
