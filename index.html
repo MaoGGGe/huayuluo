@@ -406,6 +406,54 @@ body::after{
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important;scroll-behavior:auto!important}
 }
+/* First-level tutorial: a short, visual lesson before the clock starts. */
+#guide{
+  position:absolute;inset:0;z-index:11;display:flex;align-items:center;justify-content:center;padding:18px;
+  opacity:0;pointer-events:none;background:rgba(5,7,22,.48);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px);
+  transition:opacity .45s cubic-bezier(.2,.8,.2,1);isolation:isolate
+}
+#guide.show{opacity:1;pointer-events:auto}
+#guide::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 26%,rgba(95,218,255,.12),transparent 36%),linear-gradient(145deg,rgba(255,255,255,.05),transparent 40%,rgba(239,208,138,.05))}
+.guide-card{
+  position:relative;width:min(100%,430px);max-height:calc(100% - 6px);overflow:auto;padding:24px 24px 20px;border-radius:28px;
+  text-align:center;background:linear-gradient(145deg,rgba(255,255,255,.17),rgba(255,255,255,.055) 50%,rgba(255,255,255,.1));
+  border:1px solid rgba(255,255,255,.22);box-shadow:0 30px 90px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.3),inset 0 -1px 0 rgba(255,255,255,.08);
+  transform:translateY(18px) scale(.97);transition:transform .55s cubic-bezier(.2,.8,.2,1)
+}
+#guide.show .guide-card{transform:translateY(0) scale(1)}
+.guide-card::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,rgba(255,255,255,.14),transparent 27%,transparent 72%,rgba(255,255,255,.07))}
+.guide-card>*{position:relative;z-index:1}
+.guide-mark{width:48px;height:48px;margin:0 auto 11px;border:1px solid rgba(239,208,138,.4);border-radius:50%;display:grid;place-items:center;color:var(--gold-hi);font-size:22px;background:rgba(239,208,138,.08);box-shadow:0 0 28px rgba(239,208,138,.15),inset 0 1px 0 rgba(255,255,255,.22);animation:guideMark 2.4s ease-in-out infinite}
+.guide-eyebrow{font-size:11px;color:var(--gold-hi);letter-spacing:2px}
+.guide-title{margin-top:8px;font-size:25px;line-height:1.3;color:var(--ink);font-weight:800;letter-spacing:1px}
+.guide-lead{margin-top:7px;font-size:13px;line-height:1.7;color:var(--soft)}
+.guide-demo{position:relative;width:100%;height:166px;margin:17px auto 15px;overflow:hidden;border-radius:22px;background:radial-gradient(circle at 50% 48%,rgba(74,215,255,.14),transparent 42%),linear-gradient(160deg,rgba(12,19,48,.82),rgba(12,12,34,.58));border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 14px 30px rgba(0,0,0,.16)}
+.guide-demo::before{content:"";position:absolute;inset:14px;border:1px solid rgba(239,208,138,.12);border-radius:50%;transform:scaleX(1.35);animation:guideOrbit 5s linear infinite}
+.guide-demo-caption{position:absolute;left:14px;top:11px;font-size:10px;color:rgba(232,226,210,.64);letter-spacing:1px}
+.guide-demo svg{position:absolute;inset:18px 30px 14px;width:calc(100% - 60px);height:calc(100% - 32px);overflow:visible}
+.guide-path-glow{fill:none;stroke:rgba(91,223,255,.6);stroke-width:9;stroke-linecap:round;stroke-linejoin:round;filter:blur(6px);stroke-dasharray:420;stroke-dashoffset:420;animation:guideDraw 4.8s ease-in-out infinite}
+.guide-path{fill:none;stroke:url(#guideLine);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:420;stroke-dashoffset:420;animation:guideDraw 4.8s ease-in-out infinite}
+.guide-flower{position:absolute;width:43px;height:43px;border-radius:50%;display:grid;place-items:center;color:#fff8f0;font-size:23px;background:radial-gradient(circle at 35% 28%,#fff,#f5ece0 32%,#cda86e 100%);border:1px solid rgba(255,255,255,.72);box-shadow:0 0 0 5px rgba(239,208,138,.08),0 0 25px rgba(239,208,138,.45),inset 0 1px 5px rgba(255,255,255,.7);animation:guideFlower 4.8s ease-in-out infinite}
+.guide-flower b{position:absolute;right:-5px;top:-7px;width:19px;height:19px;border-radius:50%;display:grid;place-items:center;font:700 10px sans-serif;color:#201a2c;background:linear-gradient(135deg,#fff4c9,#e8c87a);box-shadow:0 3px 8px rgba(0,0,0,.25)}
+.guide-flower.g1{left:8%;top:66%;animation-delay:0s}.guide-flower.g2{left:34%;top:30%;animation-delay:.15s}.guide-flower.g3{left:61%;top:58%;animation-delay:.3s}.guide-flower.g4{right:7%;top:19%;animation-delay:.45s}
+.guide-spirit{position:absolute;left:2%;top:70%;width:24px;height:24px;border-radius:50%;background:radial-gradient(circle at 32% 28%,#fff,#b9f5ff 38%,#2799ff);box-shadow:0 0 0 5px rgba(128,239,255,.12),0 0 24px rgba(80,220,255,.9);animation:guideSpirit 4.8s ease-in-out infinite}
+.guide-spirit::before,.guide-spirit::after{content:"";position:absolute;top:6px;width:13px;height:9px;border-radius:50%;background:rgba(139,224,255,.7)}.guide-spirit::before{right:16px;transform:rotate(-20deg)}.guide-spirit::after{left:16px;transform:rotate(20deg)}
+.guide-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:left}
+.guide-step{min-height:78px;padding:10px 9px;border-radius:16px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.1);transition:transform .35s,background .35s,border-color .35s,box-shadow .35s}
+.guide-step.active{transform:translateY(-3px);background:rgba(128,239,255,.11);border-color:rgba(128,239,255,.4);box-shadow:0 8px 22px rgba(80,220,255,.14),inset 0 1px 0 rgba(255,255,255,.18)}
+.guide-step i{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;margin-bottom:7px;color:#201a2c;background:linear-gradient(135deg,#fbe7aa,#d8a75e);font:700 11px sans-serif;font-style:normal;transition:box-shadow .35s}
+.guide-step.active i{box-shadow:0 0 0 4px rgba(128,239,255,.16),0 0 14px rgba(128,239,255,.65)}
+.guide-step b{display:block;font-size:11px;color:var(--ink);font-weight:700;white-space:nowrap}.guide-step small{display:block;margin-top:4px;font-size:9px;line-height:1.35;color:var(--soft)}
+.guide-start{width:100%;margin-top:16px!important;padding:12px 18px!important}
+.guide-hint{margin-top:10px;font-size:10px;color:rgba(185,174,202,.72)}
+@keyframes guideMark{0%,100%{transform:scale(1);box-shadow:0 0 28px rgba(239,208,138,.15),inset 0 1px 0 rgba(255,255,255,.22)}50%{transform:scale(1.06);box-shadow:0 0 36px rgba(239,208,138,.3),inset 0 1px 0 rgba(255,255,255,.3)}}
+@keyframes guideOrbit{to{transform:scaleX(1.35) rotate(360deg)}}
+@keyframes guideDraw{0%,8%{stroke-dashoffset:420}52%,78%{stroke-dashoffset:0}100%{stroke-dashoffset:-420}}
+@keyframes guideSpirit{0%{left:2%;top:70%;opacity:.3;transform:scale(.7)}10%{opacity:1;transform:scale(1)}78%{left:83%;top:22%;opacity:1;transform:scale(1)}92%,100%{left:91%;top:10%;opacity:0;transform:scale(.6)}}
+@keyframes guideFlower{0%,10%{transform:scale(.82);filter:saturate(.7);box-shadow:0 0 0 5px rgba(239,208,138,.05),0 0 12px rgba(239,208,138,.18),inset 0 1px 5px rgba(255,255,255,.5)}16%,82%{transform:scale(1);filter:saturate(1);box-shadow:0 0 0 5px rgba(239,208,138,.1),0 0 25px rgba(239,208,138,.48),inset 0 1px 5px rgba(255,255,255,.72)}100%{transform:scale(.86)}}
+@media(max-width:480px){
+  #guide{padding:10px}.guide-card{padding:20px 16px 16px;border-radius:24px}.guide-title{font-size:22px}.guide-demo{height:148px;margin-top:14px}.guide-demo svg{inset:17px 22px 12px;width:calc(100% - 44px);height:calc(100% - 29px)}.guide-flower{width:37px;height:37px;font-size:20px}.guide-flower b{width:17px;height:17px;font-size:9px}.guide-spirit{width:21px;height:21px}.guide-step{min-height:74px;padding:9px 7px}.guide-step b{font-size:10px}.guide-step small{font-size:8px}}
+@media(max-width:360px){.guide-card{padding:16px 12px 13px}.guide-mark{width:40px;height:40px;font-size:18px;margin-bottom:8px}.guide-title{font-size:20px}.guide-lead{font-size:12px}.guide-demo{height:133px}.guide-steps{gap:5px}.guide-step{min-height:70px;padding:8px 5px}.guide-step small{font-size:8px}.guide-hint{font-size:9px}}
 </style>
 </head>
 <body>
@@ -433,6 +481,35 @@ body::after{
       <button id="ik" class="intro-skip" type="button">跳过序章 <span>↗</span></button>
       <div class="intro-note">花海初醒</div>
     </div>
+    <div id="guide" aria-hidden="true">
+      <div class="guide-card" role="dialog" aria-labelledby="guideTitle" aria-describedby="guideLead">
+        <div class="guide-mark" aria-hidden="true">✿</div>
+        <p class="guide-eyebrow">第一关 · 茉莉引香</p>
+        <h2 id="guideTitle" class="guide-title">先学会引香成阵</h2>
+        <p id="guideLead" class="guide-lead">按住蓝色花灵，依次连接带编号的茉莉花。<br>四朵花全部点亮，花阵便会回应你。</p>
+        <div class="guide-demo" aria-label="花灵按一到四的顺序连接花朵示范">
+          <span class="guide-demo-caption">花灵示范</span>
+          <svg viewBox="0 0 280 150" aria-hidden="true">
+            <defs><linearGradient id="guideLine" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#f1d38e"/><stop offset=".5" stop-color="#80efff"/><stop offset="1" stop-color="#fff"/></linearGradient><filter id="guideGlow" x="-200%" y="-200%" width="400%" height="400%"><feGaussianBlur stdDeviation="3"/></filter></defs>
+            <path class="guide-path-glow" d="M12 111 C48 111 57 45 102 50 S148 114 181 94 S225 36 269 35"/>
+            <path class="guide-path" d="M12 111 C48 111 57 45 102 50 S148 114 181 94 S225 36 269 35"/>
+            <circle r="5" fill="#d9fbff" filter="url(#guideGlow)"><animateMotion dur="4.8s" repeatCount="indefinite" path="M12 111 C48 111 57 45 102 50 S148 114 181 94 S225 36 269 35"/></circle>
+          </svg>
+          <span class="guide-flower g1">✿<b>1</b></span>
+          <span class="guide-flower g2">✿<b>2</b></span>
+          <span class="guide-flower g3">✿<b>3</b></span>
+          <span class="guide-flower g4">✿<b>4</b></span>
+          <span class="guide-spirit" aria-hidden="true"></span>
+        </div>
+        <div class="guide-steps">
+          <div class="guide-step active" data-guide-step="0"><i>1</i><b>按住花灵</b><small>从底部蓝色光点开始</small></div>
+          <div class="guide-step" data-guide-step="1"><i>2</i><b>依次连花</b><small>沿着 1 → 2 → 3 → 4</small></div>
+          <div class="guide-step" data-guide-step="2"><i>3</i><b>花阵盛开</b><small>连成后获得花蜜</small></div>
+        </div>
+        <button id="guideStart" class="obtn pr guide-start" type="button">开始练习</button>
+        <p class="guide-hint">本关限时 15 秒，准备好后再开始计时</p>
+      </div>
+    </div>
     <div id="ov" class="ov">
       <div class="oc">
         <div class="seal" aria-hidden="true">
@@ -445,7 +522,7 @@ body::after{
         <div class="dv"></div>
         <h2 id="ot" class="ot">花灵 · 花雨落</h2>
         <div class="dv"></div>
-        <p id="os" class="os">采集花蜜，躲避花敌<br>十大花境，步步惊心</p>
+        <p id="os" class="os">按住花灵，依次连接编号花朵<br>路线完成后，花阵会盛开</p>
         <button id="ab" class="obtn pr">开始闯关</button>
         <button id="mm" class="obtn" style="padding:6px 18px;font-size:12px;margin-top:-4px">闯关地图</button>
         <div id="bg" class="bg hd">
@@ -468,6 +545,7 @@ body::after{
   var R=document.getElementById("gr"),CV=document.getElementById("cv"),CX=CV.getContext("2d");
   var OV=document.getElementById("ov"),OT=document.getElementById("ot"),OS=document.getElementById("os");
   var IN=document.getElementById("intro"),IK=document.getElementById("ik");
+  var GU=document.getElementById("guide"),GS=document.getElementById("guideStart"),GSteps=GU.querySelectorAll("[data-guide-step]");
   var AB=document.getElementById("ab"),RB=document.getElementById("rb"),MB=document.getElementById("mb");
   var BG=document.getElementById("bg"),SE=document.getElementById("se"),BE=document.getElementById("be"),MM=document.getElementById("mm");
   var LD=document.getElementById("ld"),TB=document.getElementById("tb");
@@ -499,6 +577,7 @@ body::after{
   var caSh=false,shAc=false,shTi=0,co=0,coTi=0,coTo=3000,nc=0,skSh=false,seaFl=[],seaSt=0;
   var nodes=[],trace=[],drawing=false,nextNode=0,nodeGoal=0,routeMsgTi=0,routeMsg="",routeStart=null;
   var introSt=0,introDur=4200,introFast=false,introSkip=false,introSkipTimer=0,introDust=[],introFlowers=[];
+  var guideTimer=0,guideStep=0;
   var cb=parseInt(localStorage.getItem("ddB")||"0",10);
   var sp=(localStorage.getItem("ddP")||"").split(",").filter(Boolean).map(Number);
   cl=sp;BE.textContent=cb;
@@ -609,6 +688,24 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
     IN.classList.remove("show");IN.classList.add("out");IN.setAttribute("aria-hidden","true");
     shMenu();
     setTimeout(function(){IN.classList.remove("out")},650)
+  }
+
+  function setGuideStep(step){
+    guideStep=step%GSteps.length;
+    for(var i=0;i<GSteps.length;i++)GSteps[i].classList.toggle("active",i===guideStep)
+  }
+
+  function showGuide(){
+    clearInterval(guideTimer);setGuideStep(0);
+    GU.classList.add("show");GU.setAttribute("aria-hidden","false");
+    guideTimer=setInterval(function(){setGuideStep(guideStep+1)},1200)
+  }
+
+  function beginGuide(){
+    if(st!=="guide")return;
+    clearInterval(guideTimer);guideTimer=0;localStorage.setItem("ddGuideSeen","1");
+    GU.classList.remove("show");GU.setAttribute("aria-hidden","true");
+    st="p";lvTi=LT*1000;TB.style.width="100%";CD.textContent="引香 0/"+nodeGoal;SH.textContent="按住拖动花灵，依次连接花朵";
   }
 
   // Flower drawing helpers
@@ -737,6 +834,7 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
   }
 
   function iL(idx){
+    clearInterval(guideTimer);guideTimer=0;GU.classList.remove("show");GU.setAttribute("aria-hidden","true");
     liIdx=idx;
     PS=Math.max(10,Math.min(15,W/38));
     pl={x:W/2,y:H-48,r:PS};
@@ -752,7 +850,10 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
     OV.classList.add("hd");LI.classList.remove("sh");
     SK.classList.remove("sh");CD.classList.remove("sh");SH.classList.remove("sh");
     CD.classList.add("sh");SH.classList.add("sh");
-    st="p";spAm()
+    spAm();
+    if(idx===0&&localStorage.getItem("ddGuideSeen")!=="1"){
+      st="guide";showGuide()
+    }else st="p"
   }
 
   function seedNodes(){
@@ -1185,6 +1286,7 @@ function sL(idx,si2){
   })
 
   CV.addEventListener("click",function(){if(caSh&&!shAc)acSh()})
+  GS.addEventListener("click",beginGuide)
 
   var lt=0;
   function loop(t){
@@ -1193,7 +1295,7 @@ function sL(idx,si2){
     if(st==="intro"){drawIntro(t);aid=requestAnimationFrame(loop);return}
     if(st==="i"){drawSea(t);aid=requestAnimationFrame(loop);return}
     upd(dt);
-    if(st==="p"||st==="f"){if(st==="p")drawGame();else draw();aid=requestAnimationFrame(loop)}
+    if(st==="p"||st==="guide"||st==="f"){if(st==="p"||st==="guide")drawGame();else draw();aid=requestAnimationFrame(loop)}
   }
 
   function shMenu(){
@@ -1202,7 +1304,7 @@ function sL(idx,si2){
     MM.style.display="";BG.classList.add("hd");OV.classList.remove("hd");
     OS.classList.remove("mp");
     OT.textContent="花灵 · 花雨落";
-    OS.innerHTML="拖动花灵，连花成阵<br>让花海回应你的路线";
+    OS.innerHTML="按住花灵，依次连接编号花朵<br>路线完成后，花阵会盛开";
     LD.textContent="1";CX.clearRect(0,0,W,H);
     LI.classList.remove("sh");SK.classList.remove("sh");
     CX.globalAlpha=0.06;
