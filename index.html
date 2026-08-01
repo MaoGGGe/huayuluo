@@ -454,6 +454,21 @@ body::after{
 @media(max-width:480px){
   #guide{padding:10px}.guide-card{padding:20px 16px 16px;border-radius:24px}.guide-title{font-size:22px}.guide-demo{height:148px;margin-top:14px}.guide-demo svg{inset:17px 22px 12px;width:calc(100% - 44px);height:calc(100% - 29px)}.guide-flower{width:37px;height:37px;font-size:20px}.guide-flower b{width:17px;height:17px;font-size:9px}.guide-spirit{width:21px;height:21px}.guide-step{min-height:74px;padding:9px 7px}.guide-step b{font-size:10px}.guide-step small{font-size:8px}}
 @media(max-width:360px){.guide-card{padding:16px 12px 13px}.guide-mark{width:40px;height:40px;font-size:18px;margin-bottom:8px}.guide-title{font-size:20px}.guide-lead{font-size:12px}.guide-demo{height:133px}.guide-steps{gap:5px}.guide-step{min-height:70px;padding:8px 5px}.guide-step small{font-size:8px}.guide-hint{font-size:9px}}
+/* Each new mechanic arrives as a short, skippable-in-spirit lesson before play begins. */
+#lesson{position:absolute;inset:0;z-index:11;display:flex;align-items:center;justify-content:center;padding:18px;opacity:0;pointer-events:none;background:rgba(5,7,22,.44);backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px);transition:opacity .4s cubic-bezier(.2,.8,.2,1)}
+#lesson.show{opacity:1;pointer-events:auto}
+.lesson-card{position:relative;width:min(100%,400px);padding:24px 24px 20px;text-align:center;border-radius:28px;overflow:hidden;background:linear-gradient(145deg,rgba(255,255,255,.17),rgba(255,255,255,.055) 50%,rgba(255,255,255,.1));border:1px solid rgba(255,255,255,.22);box-shadow:0 30px 90px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.3),inset 0 -1px 0 rgba(255,255,255,.08);transform:translateY(18px) scale(.97);transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+#lesson.show .lesson-card{transform:translateY(0) scale(1)}
+.lesson-card::before{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,rgba(255,255,255,.14),transparent 28%,transparent 72%,rgba(255,255,255,.07))}.lesson-card>*{position:relative;z-index:1}
+.lesson-visual{position:relative;height:122px;margin-bottom:15px;overflow:hidden;border-radius:22px;background:radial-gradient(circle at 50% 50%,rgba(92,220,255,.16),transparent 42%),linear-gradient(160deg,rgba(12,19,48,.82),rgba(12,12,34,.58));border:1px solid rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.16)}
+.lesson-visual::before{content:"";position:absolute;inset:12px;border:1px solid rgba(239,208,138,.13);border-radius:50%;transform:scaleX(1.32);animation:lessonOrbit 5s linear infinite}.lesson-orb{position:absolute;display:grid;place-items:center;width:46px;height:46px;border-radius:50%;font-size:23px;color:#fff9ec;background:radial-gradient(circle at 35% 28%,#fff,#f5ece0 35%,#cda86e 100%);border:1px solid rgba(255,255,255,.7);box-shadow:0 0 20px rgba(239,208,138,.42),inset 0 1px 5px rgba(255,255,255,.65)}
+.lesson-orb::after{content:attr(data-n);position:absolute;right:-5px;top:-7px;width:18px;height:18px;border-radius:50%;display:grid;place-items:center;color:#201a2c;background:#f8e2a4;font:700 10px sans-serif}.lesson-orb.a{left:16%;top:54%;animation:lessonFloat 2.2s ease-in-out infinite alternate}.lesson-orb.b{left:43%;top:18%;animation:lessonFloat 1.8s ease-in-out .35s infinite alternate}.lesson-orb.c{right:14%;top:48%;animation:lessonFloat 2.4s ease-in-out .1s infinite alternate}
+.lesson-visual[data-mode="decoy"] .lesson-orb.b{filter:saturate(.5) brightness(.6);opacity:.7}.lesson-visual[data-mode="decoy"] .lesson-orb.b::after{content:"";background:rgba(245,168,190,.8);box-shadow:0 0 0 4px rgba(245,168,190,.12)}
+.lesson-cross{position:absolute;left:19%;top:20%;width:62%;height:68%;background:linear-gradient(35deg,transparent 47%,rgba(128,239,255,.9) 48% 52%,transparent 53%),linear-gradient(-35deg,transparent 47%,rgba(245,168,190,.9) 48% 52%,transparent 53%);filter:drop-shadow(0 0 9px rgba(128,239,255,.35));animation:lessonCross 2.4s ease-in-out infinite}.lesson-cross::after{content:"";position:absolute;left:50%;top:50%;width:20px;height:20px;border-radius:50%;transform:translate(-50%,-50%);background:#f5a8be;box-shadow:0 0 0 8px rgba(245,168,190,.13),0 0 20px rgba(245,168,190,.7)}
+.lesson-dew{position:absolute;left:50%;top:50%;width:42px;height:42px;transform:translate(-50%,-50%) rotate(45deg);border-radius:13px;background:linear-gradient(135deg,#effdff,#5dd6ff 48%,#176cda);box-shadow:0 0 0 8px rgba(128,239,255,.1),0 0 28px rgba(80,220,255,.85),inset 2px 2px 8px rgba(255,255,255,.82);animation:lessonDew 1.8s ease-in-out infinite}.lesson-dew::after{content:"";position:absolute;inset:12px;border-radius:8px;border:1px solid rgba(255,255,255,.7)}
+.lesson-kicker{font-size:11px;letter-spacing:2px;color:var(--gold-hi)}.lesson-title{margin-top:8px;font-size:24px;line-height:1.3;color:var(--ink);font-weight:800}.lesson-lead{margin:8px auto 0;max-width:310px;font-size:13px;line-height:1.7;color:var(--soft)}.lesson-rule{display:inline-flex;align-items:center;gap:7px;margin-top:13px;padding:7px 11px;border:1px solid rgba(128,239,255,.22);border-radius:13px;background:rgba(128,239,255,.07);color:#ccefff;font-size:10px}.lesson-rule::before{content:"✦";color:#80efff}.lesson-start{width:100%;margin-top:17px!important;padding:12px 18px!important}
+@keyframes lessonOrbit{to{transform:scaleX(1.32) rotate(360deg)}}@keyframes lessonFloat{to{transform:translateY(-11px) rotate(5deg)}}@keyframes lessonCross{0%,100%{opacity:.58;transform:scale(.92)}50%{opacity:1;transform:scale(1.05)}}@keyframes lessonDew{0%,100%{transform:translate(-50%,-50%) rotate(45deg) scale(.9)}50%{transform:translate(-50%,-50%) rotate(45deg) scale(1.08)}}
+@media(max-width:480px){#lesson{padding:12px}.lesson-card{padding:20px 17px 17px;border-radius:24px}.lesson-visual{height:108px}.lesson-title{font-size:22px}.lesson-lead{font-size:12px}}@media(max-width:360px){.lesson-card{padding:16px 13px 14px}.lesson-visual{height:94px;margin-bottom:11px}.lesson-title{font-size:20px}.lesson-lead{font-size:11px}.lesson-rule{margin-top:10px}.lesson-start{margin-top:12px!important}}
 </style>
 </head>
 <body>
@@ -510,6 +525,16 @@ body::after{
         <p class="guide-hint">本关限时 15 秒，准备好后再开始计时</p>
       </div>
     </div>
+    <div id="lesson" aria-hidden="true">
+      <div class="lesson-card" role="dialog" aria-labelledby="lessonTitle" aria-describedby="lessonLead">
+        <div id="lessonVisual" class="lesson-visual" aria-hidden="true"></div>
+        <p id="lessonKicker" class="lesson-kicker"></p>
+        <h2 id="lessonTitle" class="lesson-title"></h2>
+        <p id="lessonLead" class="lesson-lead"></p>
+        <p id="lessonRule" class="lesson-rule"></p>
+        <button id="lessonStart" class="obtn pr lesson-start" type="button">继续探索</button>
+      </div>
+    </div>
     <div id="ov" class="ov">
       <div class="oc">
         <div class="seal" aria-hidden="true">
@@ -546,6 +571,7 @@ body::after{
   var OV=document.getElementById("ov"),OT=document.getElementById("ot"),OS=document.getElementById("os");
   var IN=document.getElementById("intro"),IK=document.getElementById("ik");
   var GU=document.getElementById("guide"),GS=document.getElementById("guideStart"),GSteps=GU.querySelectorAll("[data-guide-step]");
+  var LE=document.getElementById("lesson"),LES=document.getElementById("lessonStart"),LEV=document.getElementById("lessonVisual"),LEK=document.getElementById("lessonKicker"),LET=document.getElementById("lessonTitle"),LEL=document.getElementById("lessonLead"),LER=document.getElementById("lessonRule");
   var AB=document.getElementById("ab"),RB=document.getElementById("rb"),MB=document.getElementById("mb");
   var BG=document.getElementById("bg"),SE=document.getElementById("se"),BE=document.getElementById("be"),MM=document.getElementById("mm");
   var LD=document.getElementById("ld"),TB=document.getElementById("tb");
@@ -575,9 +601,15 @@ body::after{
   ];
   var pl,en,pa,pe,sc,st,aid,si,di,lvTi,liIdx,ke={},tl=LS.length,cl=[],peTi=0,neTi=0,am=[];
   var caSh=false,shAc=false,shTi=0,co=0,coTi=0,coTo=3000,nc=0,skSh=false,seaFl=[],seaSt=0;
-  var nodes=[],trace=[],drawing=false,nextNode=0,nodeGoal=0,routeMsgTi=0,routeMsg="",routeStart=null;
+  var nodes=[],rewards=[],trace=[],drawing=false,nextNode=0,nodeGoal=0,routeMsgTi=0,routeMsg="",routeStart=null,activeLesson=null;
   var introSt=0,introDur=4200,introFast=false,introSkip=false,introSkipTimer=0,introDust=[],introFlowers=[];
   var guideTimer=0,guideStep=0;
+  var MECHANICS=[
+    {level:1,key:"moving",mode:"moving",kicker:"第二关 · 新花语",title:"花影会随风轻移",lead:"有些带编号的花会缓缓移动。别急着落笔，先看清它下一刻的位置。",rule:"编号不会改变，耐心等它靠近香路"},
+    {level:2,key:"decoy",mode:"decoy",kicker:"第三关 · 新花语",title:"无编号的花，是幻花",lead:"颜色黯淡、没有编号的花不会回应香路。碰到它，当前路线会重新开始。",rule:"只连接带数字的花朵"},
+    {level:3,key:"cross",mode:"cross",kicker:"第四关 · 新花语",title:"香路不可交叠",lead:"从这一关起，同一条香路不能绕回自己。留出弧线，别让路线打结。",rule:"路线交叉时，香路会消散"},
+    {level:4,key:"dew",mode:"dew",kicker:"第五关 · 新花语",title:"顺路收集蓝色灵露",lead:"蓝色灵露不是目标花。沿着香路掠过它，可以额外获得花蜜；不收集也能通关。",rule:"灵露可选，花蜜额外 +12"}
+  ];
   var cb=parseInt(localStorage.getItem("ddB")||"0",10);
   var sp=(localStorage.getItem("ddP")||"").split(",").filter(Boolean).map(Number);
   cl=sp;BE.textContent=cb;
@@ -708,6 +740,44 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
     st="p";lvTi=LT*1000;TB.style.width="100%";CD.textContent="引香 0/"+nodeGoal;SH.textContent="按住拖动花灵，依次连接花朵";
   }
 
+  function lessonForLevel(idx){
+    for(var i=0;i<MECHANICS.length;i++)if(MECHANICS[i].level===idx)return MECHANICS[i];
+    return null
+  }
+
+  function mechanicSeen(key){return (localStorage.getItem("ddMechanicSeen")||"").split(",").indexOf(key)!==-1}
+
+  function markMechanicSeen(key){
+    var keys=(localStorage.getItem("ddMechanicSeen")||"").split(",").filter(Boolean);
+    if(keys.indexOf(key)===-1){keys.push(key);localStorage.setItem("ddMechanicSeen",keys.join(","))}
+  }
+
+  function lessonScene(mode){
+    if(mode==="cross")return '<div class="lesson-cross"></div>';
+    if(mode==="dew")return '<div class="lesson-dew"></div>';
+    return '<span class="lesson-orb a" data-n="1">✿</span><span class="lesson-orb b" data-n="2">✿</span><span class="lesson-orb c" data-n="3">✿</span>'
+  }
+
+  function showLesson(lesson){
+    activeLesson=lesson;LEV.dataset.mode=lesson.mode;LEV.innerHTML=lessonScene(lesson.mode);
+    LEK.textContent=lesson.kicker;LET.textContent=lesson.title;LEL.textContent=lesson.lead;LER.textContent=lesson.rule;
+    LE.classList.add("show");LE.setAttribute("aria-hidden","false")
+  }
+
+  function levelHint(idx){
+    if(idx===1)return "花影会流转，先看准位置再引香";
+    if(idx===2)return "避开无编号的幻花，只连数字花朵";
+    if(idx===3)return "香路不可交叠，留出一条流畅弧线";
+    if(idx>=4)return "蓝色灵露可顺路收集，额外获得花蜜";
+    return "按住拖动花灵，依次连接花朵"
+  }
+
+  function beginLesson(){
+    if(st!=="lesson"||!activeLesson)return;
+    markMechanicSeen(activeLesson.key);LE.classList.remove("show");LE.setAttribute("aria-hidden","true");
+    st="p";lvTi=LT*1000;TB.style.width="100%";CD.textContent="引香 0/"+nodeGoal;SH.textContent=levelHint(liIdx);activeLesson=null;
+  }
+
   // Flower drawing helpers
   function d5(cx,cy,r,co,rt,cc,al){
     CX.save();CX.translate(cx,cy);CX.rotate(rt||0);CX.globalAlpha=al||0.85;
@@ -834,25 +904,28 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
   }
 
   function iL(idx){
-    clearInterval(guideTimer);guideTimer=0;GU.classList.remove("show");GU.setAttribute("aria-hidden","true");
+    clearInterval(guideTimer);guideTimer=0;GU.classList.remove("show");GU.setAttribute("aria-hidden","true");LE.classList.remove("show");LE.setAttribute("aria-hidden","true");activeLesson=null;
     liIdx=idx;
     PS=Math.max(10,Math.min(15,W/38));
     pl={x:W/2,y:H-48,r:PS};
-    en=[];pa=[];pe=[];am=[];trace=[];nodes=[];drawing=false;nextNode=0;routeMsgTi=0;routeMsg="";routeStart=null;
+    en=[];pa=[];pe=[];am=[];trace=[];nodes=[];rewards=[];drawing=false;nextNode=0;routeMsgTi=0;routeMsg="";routeStart=null;
     sc=0;si=0;di=0;lvTi=LT*1000;peTi=0;neTi=0;
     co=0;coTi=0;nc=0;caSh=false;shAc=false;shTi=0;skSh=false;
     nodeGoal=Math.min(4+Math.floor(idx*.45),8);
-    seedNodes();
+    seedNodes();seedRewards();
     SE.textContent="0";LD.textContent=idx+1;
     CD.textContent="引香 0/"+nodeGoal;CD.classList.add("sh");
-    SH.textContent="按住拖动花灵，依次连接花朵";SH.classList.add("sh");
+    SH.textContent=levelHint(idx);SH.classList.add("sh");
     AB.style.display="";MM.style.display="none";BG.classList.add("hd");
     OV.classList.add("hd");LI.classList.remove("sh");
     SK.classList.remove("sh");CD.classList.remove("sh");SH.classList.remove("sh");
     CD.classList.add("sh");SH.classList.add("sh");
     spAm();
+    var lesson=lessonForLevel(idx);
     if(idx===0&&localStorage.getItem("ddGuideSeen")!=="1"){
       st="guide";showGuide()
+    }else if(lesson&&!mechanicSeen(lesson.key)){
+      st="lesson";showLesson(lesson)
     }else st="p"
   }
 
@@ -864,10 +937,24 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
       var ny=margin+usableH*(.08+row*.76)+(Math.random()-.5)*H*.035;
       nodes.push({x:nx,y:ny,bx:nx,by:ny,r:Math.max(18,Math.min(27,unitForCanvas()*.055)),fi:fidx,order:i,hit:false,phase:Math.random()*Math.PI*2,moving:liIdx>0&&i%2===0,amp:Math.min(18,W*.045),speed:.0007+liIdx*.00012})
     }
-    var decoys=Math.min(2,Math.floor(liIdx/2)+1);
+    var decoys=liIdx<2?0:Math.min(2,Math.floor(liIdx/2));
     for(var j=0;j<decoys;j++){
       var df=(fidx+2+j)%FC.length,dx=W*(.25+Math.random()*.5),dy=margin+usableH*(.18+Math.random()*.62);
       nodes.push({x:dx,y:dy,bx:dx,by:dy,r:Math.max(16,Math.min(23,unitForCanvas()*.045)),fi:df,order:-1,hit:false,phase:Math.random()*Math.PI*2,moving:liIdx>1,amp:Math.min(12,W*.03),speed:.0008+liIdx*.0001})
+    }
+  }
+
+  function seedRewards(){
+    if(liIdx<4)return;
+    var count=Math.min(2,1+Math.floor((liIdx-4)/3)),attempts=0;
+    while(rewards.length<count&&attempts<30){
+      attempts++;
+      var x=W*(.2+Math.random()*.6),y=H*(.22+Math.random()*.52),clear=true;
+      for(var i=0;i<nodes.length;i++){
+        var dx=x-nodes[i].x,dy=y-nodes[i].y;
+        if(dx*dx+dy*dy<Math.pow(nodes[i].r*2.4,2)){clear=false;break}
+      }
+      if(clear)rewards.push({x:x,y:y,r:Math.max(9,Math.min(13,unitForCanvas()*.025)),taken:false,phase:Math.random()*Math.PI*2})
     }
   }
 
@@ -949,6 +1036,16 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
     }
   }
 
+  function checkRouteReward(x,y){
+    for(var i=0;i<rewards.length;i++){
+      var reward=rewards[i],dx=x-reward.x,dy=y-reward.y;
+      if(!reward.taken&&dx*dx+dy*dy<Math.pow(reward.r*1.75,2)){
+        reward.taken=true;sc+=12;SE.textContent=sc;routeMsg="灵露 +12";routeMsgTi=650;
+        CD.textContent=routeMsg;CD.classList.remove("sh");void CD.offsetWidth;CD.classList.add("sh");spEx(reward.x,reward.y,"#80efff",22)
+      }
+    }
+  }
+
   function moveRoute(clientX,clientY,active){
     if(st!=="p")return;
     var point=canvasPoint(clientX,clientY);pl.x=point.x;pl.y=point.y;
@@ -956,10 +1053,10 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
     if(!drawing){drawing=true;trace=[point];routeStart=point;return}
     var last=trace[trace.length-1],dx=point.x-last.x,dy=point.y-last.y;
     if(dx*dx+dy*dy<9)return;
-    for(var i=0;i<trace.length-2;i++){
+    if(liIdx>=3)for(var i=0;i<trace.length-2;i++){
       if(segmentsCross(trace[i],trace[i+1],last,point)){resetRoute(point.x,point.y,"香路交叠，重新引香");return}
     }
-    trace.push(point);checkRouteNode(point.x,point.y)
+    trace.push(point);checkRouteReward(point.x,point.y);checkRouteNode(point.x,point.y)
   }
 
   function upd(dt){
@@ -1115,6 +1212,13 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
       var end=trace[trace.length-1],line=CX.createLinearGradient(trace[0].x,trace[0].y,end.x,end.y);line.addColorStop(0,"rgba(239,208,138,.35)");line.addColorStop(.5,"rgba(128,239,255,.95)");line.addColorStop(1,"rgba(255,255,255,.92)");
       CX.save();CX.lineCap="round";CX.lineJoin="round";CX.globalAlpha=.22;CX.strokeStyle="#55ddff";CX.lineWidth=Math.max(9,unit*.035);CX.beginPath();CX.moveTo(trace[0].x,trace[0].y);for(var j=1;j<trace.length;j++)CX.lineTo(trace[j].x,trace[j].y);CX.stroke();CX.globalAlpha=.94;CX.strokeStyle=line;CX.lineWidth=Math.max(2,unit*.012);CX.beginPath();CX.moveTo(trace[0].x,trace[0].y);for(var j=1;j<trace.length;j++)CX.lineTo(trace[j].x,trace[j].y);CX.stroke();CX.restore()
     }
+    for(var ri=0;ri<rewards.length;ri++){
+      var reward=rewards[ri],rp=.78+.22*Math.sin(now*.006+reward.phase);
+      if(!reward.taken){
+        dNe(reward.x,reward.y,reward.r*rp,"#5dd6ff");
+        CX.globalAlpha=.8;CX.fillStyle="#c8f8ff";CX.font="600 "+Math.max(9,unit*.025)+"px sans-serif";CX.textAlign="center";CX.textBaseline="top";CX.fillText("灵露",reward.x,reward.y+reward.r*1.45)
+      }
+    }
     for(var i=0;i<nodes.length;i++){
       var n=nodes[i],nf=FC[n.fi],active=n.order>=0&&!n.hit&&n.order===nextNode,pulse=.72+.28*Math.sin(now*.004+n.phase);
       var ng=CX.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r*2.7);ng.addColorStop(0,active?"rgba(128,239,255,.24)":"rgba(255,255,255,.07)");ng.addColorStop(1,"rgba(80,220,255,0)");CX.fillStyle=ng;CX.globalAlpha=active?pulse:1;CX.beginPath();CX.arc(n.x,n.y,n.r*2.7,0,Math.PI*2);CX.fill();
@@ -1128,7 +1232,7 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
     var pt=now*.0004;CX.globalAlpha=.18;CX.fillStyle="#d6fbff";for(var i=0;i<5;i++){var a=i/5*Math.PI*2+pt;CX.save();CX.translate(px,py);CX.rotate(a);CX.beginPath();CX.ellipse(0,-pr*1.5,pr*.3,pr*.72,0,0,Math.PI*2);CX.fill();CX.restore()}
     var bodyG=CX.createRadialGradient(px-pr*.3,py-pr*.4,pr*.15,px,py,pr*1.15);bodyG.addColorStop(0,"#fff");bodyG.addColorStop(.42,"#b9f5ff");bodyG.addColorStop(1,"#3aa8ff");CX.fillStyle=bodyG;CX.globalAlpha=1;CX.beginPath();CX.arc(px,py,pr,0,Math.PI*2);CX.fill();CX.fillStyle="rgba(20,18,40,.25)";CX.beginPath();CX.arc(px-pr*.2,py-pr*.2,pr*.34,0,Math.PI*2);CX.fill();
     var wt=now*.003;CX.globalAlpha=.34;CX.fillStyle="#8be0ff";CX.save();CX.translate(px-pr*.5,py);CX.scale(1,.6+Math.sin(wt)*.3);CX.beginPath();CX.ellipse(0,0,pr*.6,pr*.5,0,0,Math.PI*2);CX.fill();CX.restore();CX.save();CX.translate(px+pr*.5,py);CX.scale(1,.6+Math.sin(wt+Math.PI)*.3);CX.beginPath();CX.ellipse(0,0,pr*.6,pr*.5,0,0,Math.PI*2);CX.fill();CX.restore();
-    CX.globalAlpha=.72;CX.fillStyle=c.mf;CX.font="600 11px sans-serif";CX.textAlign="left";CX.textBaseline="top";CX.fillText("引香成阵",16,16);CX.globalAlpha=.5;CX.font="10px sans-serif";CX.fillText(FC[fi].n+" · 依次点亮花朵",16,33);CX.globalAlpha=.8;CX.fillStyle="#a8e9ff";CX.font="600 11px sans-serif";CX.textAlign="right";CX.fillText(nextNode+" / "+nodeGoal,W-16,H-24);CX.globalAlpha=1
+    CX.globalAlpha=.72;CX.fillStyle=c.mf;CX.font="600 11px sans-serif";CX.textAlign="left";CX.textBaseline="top";CX.fillText("引香成阵",16,16);CX.globalAlpha=.5;CX.font="10px sans-serif";CX.fillText(rewards.length?FC[fi].n+" · 蓝色灵露可加分":FC[fi].n+" · 依次点亮花朵",16,33);CX.globalAlpha=.8;CX.fillStyle="#a8e9ff";CX.font="600 11px sans-serif";CX.textAlign="right";CX.fillText(nextNode+" / "+nodeGoal,W-16,H-24);CX.globalAlpha=1
   }
 
   function colN(p){
@@ -1287,6 +1391,7 @@ function sL(idx,si2){
 
   CV.addEventListener("click",function(){if(caSh&&!shAc)acSh()})
   GS.addEventListener("click",beginGuide)
+  LES.addEventListener("click",beginLesson)
 
   var lt=0;
   function loop(t){
@@ -1295,7 +1400,7 @@ function sL(idx,si2){
     if(st==="intro"){drawIntro(t);aid=requestAnimationFrame(loop);return}
     if(st==="i"){drawSea(t);aid=requestAnimationFrame(loop);return}
     upd(dt);
-    if(st==="p"||st==="guide"||st==="f"){if(st==="p"||st==="guide")drawGame();else draw();aid=requestAnimationFrame(loop)}
+    if(st==="p"||st==="guide"||st==="lesson"||st==="f"){if(st==="p"||st==="guide"||st==="lesson")drawGame();else draw();aid=requestAnimationFrame(loop)}
   }
 
   function shMenu(){
