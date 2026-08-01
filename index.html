@@ -323,6 +323,59 @@ body::after{
   box-shadow:0 10px 26px rgba(0,0,0,0.18),inset 0 1px 0 rgba(255,255,255,0.1);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)
 }
 @keyframes pb{from{opacity:.55;transform:translateY(1px)}to{opacity:1;transform:translateY(0)}}
+/* Opening sequence: an unframed cinematic title treatment over the live canvas. */
+#intro{
+  position:absolute;inset:0;z-index:12;overflow:hidden;display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;background:rgba(4,6,21,0.92);transition:opacity .72s cubic-bezier(.2,.7,.2,1);isolation:isolate
+}
+#intro.show{opacity:1;pointer-events:auto}
+#intro.out{opacity:0;pointer-events:none;transition-duration:.58s}
+#intro::before{
+  content:"";position:absolute;inset:-25%;z-index:-1;opacity:.84;
+  background:radial-gradient(ellipse at 50% 46%,rgba(90,211,255,0.15),transparent 25%),radial-gradient(ellipse at 50% 100%,rgba(225,142,107,0.18),transparent 48%),linear-gradient(145deg,#070a20,#14102d 48%,#081b2a);
+  animation:introBreath 5s ease-in-out infinite alternate
+}
+#intro::after{
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.42;
+  background:linear-gradient(120deg,rgba(255,255,255,.12),transparent 23%,transparent 75%,rgba(255,255,255,.08));mix-blend-mode:screen
+}
+#intro .intro-halo{
+  position:absolute;width:min(76vw,420px);aspect-ratio:1;border-radius:50%;border:1px solid rgba(161,231,255,.22);
+  box-shadow:0 0 0 1px rgba(255,255,255,.04),0 0 90px rgba(63,190,255,.18),inset 0 0 70px rgba(63,190,255,.09);
+  opacity:0;transform:scale(.62);animation:introHalo 4s cubic-bezier(.2,.8,.2,1) forwards
+}
+#intro .intro-halo::before,#intro .intro-halo::after{content:"";position:absolute;inset:11%;border-radius:50%;border:1px solid rgba(239,208,138,.2);transform:rotate(45deg) scaleY(.45)}
+#intro .intro-halo::after{inset:20%;transform:rotate(-45deg) scaleY(.45);border-color:rgba(255,255,255,.12)}
+#intro .intro-copy{display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;z-index:2;padding:24px;transform:translateY(18px)}
+#intro .intro-kicker,#intro .intro-title,#intro .intro-sub,#intro .intro-rule,#intro .intro-credit{opacity:0;transform:translateY(14px);animation:introCopy .75s cubic-bezier(.2,.75,.2,1) forwards}
+#intro .intro-kicker{font-size:11px;color:rgba(235,221,189,.72);letter-spacing:5px;animation-delay:.3s}
+#intro .intro-title{margin-top:17px;font-size:clamp(40px,8vw,72px);line-height:1.12;font-weight:700;letter-spacing:8px;padding-left:8px;color:#fff7dd;background:linear-gradient(135deg,#fff8df 8%,#efd08a 52%,#c39055 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 10px 28px rgba(239,208,138,.26));animation-delay:.5s}
+#intro .intro-title em{display:block;font-size:.5em;line-height:1.8;font-style:normal;font-weight:500;letter-spacing:11px;padding-left:11px;color:#f3c8d4;background:linear-gradient(135deg,#ffe7ec,#efafc1 55%,#c47799);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+#intro .intro-sub{margin-top:15px;font-size:13px;letter-spacing:4px;color:rgba(229,216,194,.78);animation-delay:.72s}
+#intro .intro-rule{width:130px;height:1px;margin-top:21px;background:linear-gradient(90deg,transparent,rgba(239,208,138,.72),transparent);animation-delay:.84s}
+#intro .intro-credit{margin-top:15px;font-size:10px;letter-spacing:2px;color:rgba(185,174,202,.68);animation-delay:.95s}
+#intro .intro-skip{position:absolute;right:20px;bottom:20px;z-index:3;display:flex;align-items:center;gap:8px;padding:9px 15px;border:1px solid rgba(255,255,255,.22);border-radius:15px;color:rgba(255,255,255,.78);font:inherit;font-size:11px;letter-spacing:1px;background:rgba(255,255,255,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 10px 28px rgba(0,0,0,.22);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .35s,transform .35s,background .25s;cursor:pointer}
+#intro .intro-skip.ready{opacity:1;transform:translateY(0);pointer-events:auto}
+#intro .intro-skip:hover{background:rgba(255,255,255,.15);transform:translateY(-2px)}
+#intro .intro-skip:active{transform:scale(.97)}
+#intro .intro-skip span{font-size:14px;line-height:1;color:var(--gold-hi)}
+#intro .intro-note{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:3px;color:rgba(185,174,202,.52);white-space:nowrap;animation:introNote 1.6s ease-in-out infinite alternate}
+#intro.quick .intro-halo{animation-duration:1.7s}
+#intro.quick .intro-kicker,#intro.quick .intro-title,#intro.quick .intro-sub,#intro.quick .intro-rule,#intro.quick .intro-credit{animation-duration:.38s}
+@keyframes introBreath{from{transform:scale(1) rotate(0deg)}to{transform:scale(1.08) rotate(2deg)}}
+@keyframes introHalo{0%{opacity:0;transform:scale(.62) rotate(-16deg)}32%{opacity:.8}100%{opacity:.44;transform:scale(1.08) rotate(18deg)}}
+@keyframes introCopy{to{opacity:1;transform:translateY(0)}}
+@keyframes introNote{from{opacity:.35}to{opacity:.85}}
+@media(max-width:640px){
+  #intro .intro-copy{padding:20px}
+  #intro .intro-kicker{font-size:9px;letter-spacing:3px}
+  #intro .intro-title{margin-top:13px;letter-spacing:5px;padding-left:5px}
+  #intro .intro-title em{letter-spacing:7px;padding-left:7px}
+  #intro .intro-sub{font-size:11px;letter-spacing:2px}
+  #intro .intro-credit{font-size:9px;letter-spacing:1px}
+  #intro .intro-skip{right:14px;bottom:14px}
+  #intro .intro-note{bottom:18px;font-size:9px;letter-spacing:2px}
+}
 @media(max-width:640px){
   #gr{padding:max(8px,env(safe-area-inset-top)) 10px max(6px,env(safe-area-inset-bottom));gap:8px}
   #gr .brand{display:none}
@@ -367,6 +420,18 @@ body::after{
     <canvas id="cv" width="400" height="500" tabindex="0"></canvas>
     <div id="cd" class="cd"></div>
     <div id="shh" class="shh">✦ 点击发动花盾 ✦</div>
+    <div id="intro" class="intro" aria-hidden="true">
+      <div class="intro-halo" aria-hidden="true"></div>
+      <div class="intro-copy">
+        <div class="intro-kicker">花灵序章 · 第一卷</div>
+        <h1 class="intro-title">花灵<em>花雨落</em></h1>
+        <p class="intro-sub">一花一世界，一叶一江湖</p>
+        <div class="intro-rule" aria-hidden="true"></div>
+        <p class="intro-credit">由 YanYue 赠 M1 Pro 所制</p>
+      </div>
+      <button id="ik" class="intro-skip" type="button">跳过序章 <span>↗</span></button>
+      <div class="intro-note">花海初醒</div>
+    </div>
     <div id="ov" class="ov">
       <div class="oc">
         <div class="seal" aria-hidden="true">
@@ -401,6 +466,7 @@ body::after{
 (function(){
   var R=document.getElementById("gr"),CV=document.getElementById("cv"),CX=CV.getContext("2d");
   var OV=document.getElementById("ov"),OT=document.getElementById("ot"),OS=document.getElementById("os");
+  var IN=document.getElementById("intro"),IK=document.getElementById("ik");
   var AB=document.getElementById("ab"),RB=document.getElementById("rb"),MB=document.getElementById("mb");
   var BG=document.getElementById("bg"),SE=document.getElementById("se"),BE=document.getElementById("be"),MM=document.getElementById("mm");
   var LD=document.getElementById("ld"),TB=document.getElementById("tb");
@@ -430,6 +496,7 @@ body::after{
   ];
   var pl,en,pa,pe,sc,st,aid,si,di,lvTi,liIdx,ke={},tl=LS.length,cl=[],peTi=0,neTi=0,am=[];
   var caSh=false,shAc=false,shTi=0,co=0,coTi=0,coTo=3000,nc=0,skSh=false,seaFl=[],seaSt=0;
+  var introSt=0,introDur=4200,introFast=false,introSkip=false,introSkipTimer=0,introDust=[],introFlowers=[];
   var cb=parseInt(localStorage.getItem("ddB")||"0",10);
   var sp=(localStorage.getItem("ddP")||"").split(",").filter(Boolean).map(Number);
   cl=sp;BE.textContent=cb;
@@ -468,6 +535,79 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
   }
 
   function sav(){localStorage.setItem("ddP",cl.join(","))}
+
+  function seedIntro(){
+    introDust=[];introFlowers=[];
+    for(var i=0;i<96;i++){
+      introDust.push({a:Math.random()*Math.PI*2,d:.08+Math.random()*.92,s:.35+Math.random()*1.6,z:.5+Math.random()*2.2,o:.18+Math.random()*.62,p:Math.random()*Math.PI*2})
+    }
+    for(var j=0;j<52;j++){
+      introFlowers.push({a:Math.random()*Math.PI*2,d:.18+Math.random()*.92,s:8+Math.random()*18,fi:Math.floor(Math.random()*FC.length),r:Math.random()*Math.PI*2,rs:(Math.random()-.5)*.02,o:.22+Math.random()*.55,p:Math.random()*Math.PI*2})
+    }
+  }
+
+  function easeOutCubic(v){return 1-Math.pow(1-Math.max(0,Math.min(1,v)),3)}
+
+  function drawIntro(t){
+    var elapsed=t-introSt,progress=Math.max(0,Math.min(1,elapsed/Math.max(1,introDur)));
+    var cx=W*.5,cy=H*.47,unit=Math.max(1,Math.min(W,H)),reach=Math.max(W,H)*.72;
+    CX.clearRect(0,0,W,H);
+    var bg=CX.createLinearGradient(0,0,0,H);
+    bg.addColorStop(0,"#070a20");bg.addColorStop(.48,"#14112f");bg.addColorStop(1,"#071b2b");
+    CX.fillStyle=bg;CX.fillRect(0,0,W,H);
+    var aura=CX.createRadialGradient(cx,cy,0,cx,cy,reach*.68);
+    aura.addColorStop(0,"rgba(73,199,255,.17)");aura.addColorStop(.36,"rgba(94,144,245,.08)");aura.addColorStop(1,"rgba(4,9,25,0)");
+    CX.fillStyle=aura;CX.fillRect(0,0,W,H);
+
+    var rayP=easeOutCubic(elapsed/1700);
+    CX.save();CX.translate(cx,cy);CX.globalAlpha=.11*rayP;CX.strokeStyle="#d8bdf0";CX.lineWidth=.7;
+    for(var i=0;i<28;i++){
+      var ra=i/28*Math.PI*2+elapsed*.00008;
+      CX.beginPath();CX.moveTo(Math.cos(ra)*unit*.04,Math.sin(ra)*unit*.04);CX.lineTo(Math.cos(ra)*(unit*.15+reach*.8*rayP),Math.sin(ra)*(unit*.15+reach*.8*rayP));CX.stroke()
+    }
+    CX.restore();
+
+    for(var d=0;d<introDust.length;d++){
+      var dust=introDust[d],da=dust.a+t*.00005*dust.s,dd=reach*dust.d*(.45+progress*.65),dx=cx+Math.cos(da)*dd,dy=cy+Math.sin(da)*dd*.72;
+      if(dx<-4||dx>W+4||dy<-4||dy>H+4)continue;
+      CX.globalAlpha=dust.o*(.35+.65*Math.sin(t*.002+dust.p)**2);CX.fillStyle=dust.d>.72?"#efd08a":"#a8e9ff";
+      CX.beginPath();CX.arc(dx,dy,dust.z,0,Math.PI*2);CX.fill()
+    }
+
+    var flowerP=easeOutCubic((elapsed-220)/Math.max(1,introDur*.72));
+    for(var f=0;f<introFlowers.length;f++){
+      var flower=introFlowers[f],fa=flower.a+t*.00012*(flower.rs<0?-1:1),fd=reach*flower.d*flowerP,fx=cx+Math.cos(fa)*fd,fy=cy+Math.sin(fa)*fd*.72;
+      var fscale=.12+flowerP*.88,fo=flower.o*(.18+.82*flowerP);
+      if(fo>.025&&fx>-50&&fx<W+50&&fy>-50&&fy<H+50)dBF(fx,fy,flower.s*fscale,flower.fi,flower.r+t*flower.rs,fo)
+    }
+
+    var ringP=easeOutCubic(elapsed/1200),ring=unit*(.055+.16*ringP);
+    CX.globalAlpha=.3*(1-progress*.35);CX.strokeStyle="rgba(159,231,255,.7)";CX.lineWidth=1;
+    CX.beginPath();CX.arc(cx,cy,ring,0,Math.PI*2);CX.stroke();
+    CX.globalAlpha=.14*(1-progress*.28);CX.strokeStyle="rgba(239,208,138,.85)";CX.lineWidth=1;
+    CX.beginPath();CX.ellipse(cx,cy,ring*1.26,ring*.42,elapsed*.0002,0,Math.PI*2);CX.stroke();
+    if(progress>.06)dNe(cx,cy,Math.max(6,Math.min(10,unit*.018)),"#5dd6ff");
+    CX.globalAlpha=1;
+
+    if(progress>=1)finishIntro()
+  }
+
+  function startIntro(){
+    introFast=localStorage.getItem("ddIntroSeen")==="1";
+    introDur=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches?900:(introFast?2200:4200);
+    introSt=performance.now();introSkip=false;seedIntro();
+    st="intro";lt=introSt;IN.classList.remove("out");IN.classList.toggle("quick",introFast);IN.classList.add("show");IN.setAttribute("aria-hidden","false");IK.classList.remove("ready");
+    clearTimeout(introSkipTimer);introSkipTimer=setTimeout(function(){IK.classList.add("ready");introSkip=true},introFast?520:900);
+    loop(introSt)
+  }
+
+  function finishIntro(){
+    if(st!=="intro")return;
+    clearTimeout(introSkipTimer);localStorage.setItem("ddIntroSeen","1");
+    IN.classList.remove("show");IN.classList.add("out");IN.setAttribute("aria-hidden","true");
+    shMenu();
+    setTimeout(function(){IN.classList.remove("out")},650)
+  }
 
   // Flower drawing helpers
   function d5(cx,cy,r,co,rt,cc,al){
@@ -980,6 +1120,7 @@ function sL(idx,si2){
   function loop(t){
     if(st==="m"||st==="g"||st==="menu")return;
     var dt=Math.min(t-lt,50);lt=t;
+    if(st==="intro"){drawIntro(t);aid=requestAnimationFrame(loop);return}
     if(st==="i"){drawSea(t);aid=requestAnimationFrame(loop);return}
     upd(dt);
     if(st==="p"||st==="f"){draw();aid=requestAnimationFrame(loop)}
@@ -1007,6 +1148,7 @@ function sL(idx,si2){
 
   document.addEventListener("keydown",function(e){
     ke[e.code]=true;
+    if(st==="intro"&&introSkip&&(e.code==="Escape"||e.code==="Enter"||e.code==="Space")){e.preventDefault();finishIntro();return}
     if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Space"].indexOf(e.code)!==-1)e.preventDefault()
   });
   document.addEventListener("keyup",function(e){ke[e.code]=false});
@@ -1018,6 +1160,11 @@ function sL(idx,si2){
     if(caSh&&!shAc)acSh()
   },{passive:false});
   CV.addEventListener("touchmove",function(e){e.preventDefault();hp(e.touches[0].clientX)},{passive:false});
+
+  IN.addEventListener("click",function(e){
+    if(introSkip&&e.target!==IK)finishIntro()
+  });
+  IK.addEventListener("click",function(e){e.stopPropagation();if(introSkip)finishIntro()});
 
   AB.addEventListener("click",function(){
     var t=parseInt(AB.dataset.t,10);
@@ -1034,7 +1181,7 @@ function sL(idx,si2){
   MM.addEventListener("click",function(){shM()});
 
   resizeCv();
-  shMenu()
+  startIntro()
 })();
 </script>
 </body>
