@@ -1357,6 +1357,19 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
     trace.push(point);checkRouteReward(point.x,point.y);checkRouteNode(point.x,point.y)
   }
 
+  function resolveShiftLayout(){
+    var active=[],windPadding=Math.max(10,Math.min(24,W*(currentRules.wind||0)*.2));
+    for(var i=0;i<nodes.length;i++)if(nodes[i].order>=0&&!nodes[i].hit)active.push(nodes[i]);
+    for(var pass=0;pass<6;pass++)for(var left=0;left<active.length;left++)for(var right=left+1;right<active.length;right++){
+      var a=active[left],b=active[right],dx=b.bx-a.bx,dy=b.by-a.by,distance=Math.sqrt(dx*dx+dy*dy),required=a.r+b.r+windPadding;
+      if(distance>=required)continue;
+      if(distance<.1){dx=0;dy=left%2?1:-1;distance=1}
+      var push=(required-distance)*.5,ux=dx/distance,uy=dy/distance;
+      a.bx=Math.max(a.r+14,Math.min(W-a.r-14,a.bx-ux*push));a.by=Math.max(a.r+18,Math.min(H-a.r-38,a.by-uy*push));
+      b.bx=Math.max(b.r+14,Math.min(W-b.r-14,b.bx+ux*push));b.by=Math.max(b.r+18,Math.min(H-b.r-38,b.by+uy*push));
+    }
+  }
+
   function upd(dt){
     if(st==="p"){
       if(shAc){shTi-=dt;if(shTi<=0){shAc=false;shTi=0;SH.textContent=levelHint(liIdx);SH.classList.add("sh")}}else lvTi-=dt;
@@ -1368,12 +1381,17 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
         shifted=true;
         playSound("shift");
         shiftBloom=900;
+        var movedFlowers=[];
         for(var swap=0;swap<nodes.length;swap++){
           var sn=nodes[swap];
           if(sn.order>=0){
             if(sn.hit){sn.clearing=260;spBloom(sn.x,sn.y,sn.fi,12,false)}
-            else{sn.bx=W-sn.bx;sn.by=Math.max(54,Math.min(H-70,sn.by+(swap%2?34:-34)));sn.x=sn.bx;sn.y=sn.by;sn.bloom=420;spBloom(sn.x,sn.y,sn.fi,8,false)}
+            else{sn.bx=W-sn.bx;sn.by=Math.max(54,Math.min(H-70,sn.by+(swap%2?34:-34)));movedFlowers.push(sn)}
           }
+        }
+        resolveShiftLayout();
+        for(var moveI=0;moveI<movedFlowers.length;moveI++){
+          var moved=movedFlowers[moveI];moved.x=moved.bx;moved.y=moved.by;moved.bloom=420;spBloom(moved.x,moved.y,moved.fi,8,false)
         }
         SH.textContent="花阵换位，重新观察剩余数字";SH.classList.add("sh")
       }
