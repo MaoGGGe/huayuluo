@@ -1256,8 +1256,36 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
     return((ab1>0&&ab2<0)||(ab1<0&&ab2>0))&&((cd1>0&&cd2<0)||(cd1<0&&cd2>0))
   }
 
+  function pointSegmentDistanceSq(p,a,b){
+    var dx=b.x-a.x,dy=b.y-a.y,length=dx*dx+dy*dy;
+    if(length===0){dx=p.x-a.x;dy=p.y-a.y;return dx*dx+dy*dy}
+    var ratio=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/length)),px=a.x+dx*ratio,py=a.y+dy*ratio;
+    dx=p.x-px;dy=p.y-py;return dx*dx+dy*dy
+  }
+
+  function segmentDistanceSq(a,b,c,d){
+    if(segmentsCross(a,b,c,d))return 0;
+    return Math.min(pointSegmentDistanceSq(a,c,d),pointSegmentDistanceSq(b,c,d),pointSegmentDistanceSq(c,a,b),pointSegmentDistanceSq(d,a,b))
+  }
+
+  function branchCurve(branch){
+    return{x:(branch.x1+branch.x2)*.5,y:(branch.y1+branch.y2)*.5-12}
+  }
+
+  function branchPoint(branch,ratio){
+    var curve=branchCurve(branch),inverse=1-ratio;
+    return{x:inverse*inverse*branch.x1+2*inverse*ratio*curve.x+ratio*ratio*branch.x2,y:inverse*inverse*branch.y1+2*inverse*ratio*curve.y+ratio*ratio*branch.y2}
+  }
+
   function hitsBranch(a,b,branch){
-    return segmentsCross(a,b,{x:branch.x1,y:branch.y1},{x:branch.x2,y:branch.y2})
+    /* The visible branch is curved, so collision follows the same curve instead of its invisible chord. */
+    var previous=branchPoint(branch,0),clearance=Math.max(6,unitForCanvas()*.014);
+    for(var part=1;part<=18;part++){
+      var current=branchPoint(branch,part/18);
+      if(segmentDistanceSq(a,b,previous,current)<=clearance*clearance)return true;
+      previous=current;
+    }
+    return false
   }
 
   function resetRoute(x,y,message){
