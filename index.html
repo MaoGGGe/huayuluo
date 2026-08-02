@@ -1360,13 +1360,24 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
   function resolveShiftLayout(){
     var active=[],windPadding=Math.max(10,Math.min(24,W*(currentRules.wind||0)*.2));
     for(var i=0;i<nodes.length;i++)if(nodes[i].order>=0&&!nodes[i].hit)active.push(nodes[i]);
-    for(var pass=0;pass<6;pass++)for(var left=0;left<active.length;left++)for(var right=left+1;right<active.length;right++){
-      var a=active[left],b=active[right],dx=b.bx-a.bx,dy=b.by-a.by,distance=Math.sqrt(dx*dx+dy*dy),required=a.r+b.r+windPadding;
-      if(distance>=required)continue;
-      if(distance<.1){dx=0;dy=left%2?1:-1;distance=1}
-      var push=(required-distance)*.5,ux=dx/distance,uy=dy/distance;
-      a.bx=Math.max(a.r+14,Math.min(W-a.r-14,a.bx-ux*push));a.by=Math.max(a.r+18,Math.min(H-a.r-38,a.by-uy*push));
-      b.bx=Math.max(b.r+14,Math.min(W-b.r-14,b.bx+ux*push));b.by=Math.max(b.r+18,Math.min(H-b.r-38,b.by+uy*push));
+    for(var pass=0;pass<6;pass++){
+      for(var left=0;left<active.length;left++)for(var right=left+1;right<active.length;right++){
+        var a=active[left],b=active[right],dx=b.bx-a.bx,dy=b.by-a.by,distance=Math.sqrt(dx*dx+dy*dy),required=a.r+b.r+windPadding;
+        if(distance>=required)continue;
+        if(distance<.1){dx=0;dy=left%2?1:-1;distance=1}
+        var push=(required-distance)*.5,ux=dx/distance,uy=dy/distance;
+        a.bx=Math.max(a.r+14,Math.min(W-a.r-14,a.bx-ux*push));a.by=Math.max(a.r+18,Math.min(H-a.r-38,a.by-uy*push));
+        b.bx=Math.max(b.r+14,Math.min(W-b.r-14,b.bx+ux*push));b.by=Math.max(b.r+18,Math.min(H-b.r-38,b.by+uy*push));
+      }
+      /* Shifted targets must also leave a clean exit from the completed route. */
+      for(var flowerI=0;flowerI<active.length;flowerI++)for(var seg=1;seg<trace.length;seg++){
+        var flower=active[flowerI],start=trace[seg-1],end=trace[seg],sx=end.x-start.x,sy=end.y-start.y,length=sx*sx+sy*sy,ratio=length?Math.max(0,Math.min(1,((flower.bx-start.x)*sx+(flower.by-start.y)*sy)/length)):0;
+        var nearX=start.x+sx*ratio,nearY=start.y+sy*ratio,awayX=flower.bx-nearX,awayY=flower.by-nearY,awayDistance=Math.sqrt(awayX*awayX+awayY*awayY),routeClearance=flower.r+windPadding+14;
+        if(awayDistance>=routeClearance)continue;
+        if(awayDistance<.1){awayX=-sy;awayY=sx;awayDistance=Math.sqrt(awayX*awayX+awayY*awayY)||1}
+        var move=routeClearance-awayDistance,moveX=awayX/awayDistance*move,moveY=awayY/awayDistance*move;
+        flower.bx=Math.max(flower.r+14,Math.min(W-flower.r-14,flower.bx+moveX));flower.by=Math.max(flower.r+18,Math.min(H-flower.r-38,flower.by+moveY));
+      }
     }
   }
 
