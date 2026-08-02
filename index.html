@@ -811,7 +811,7 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
       {count:4},{count:4,moving:true},{count:4,decoys:1},{count:5,cross:true,decoys:1},
       {count:5,cross:true,dew:1},{count:6,cross:true,dew:1},{count:6,cross:true,moving:true,decoys:1},{count:6,cross:true,moving:true,dew:2,decoys:1},
       {count:6,cross:true,wind:.2,dew:1},{count:6,cross:true,wind:.28,windFlip:true,dew:2},{count:7,cross:true,branches:1,dew:1},
-      {count:7,cross:true,branches:2,wind:.18,dew:2},{count:7,cross:true,mist:true,dew:1},{count:7,cross:true,mist:true,branches:1,dew:2},
+      {count:7,cross:true,branches:2,wind:.10,dew:2},{count:7,cross:true,mist:true,dew:1},{count:7,cross:true,mist:true,branches:1,dew:2},
       {count:7,cross:true,wilt:true,wind:.2,dew:2},{count:8,cross:true,wilt:true,wind:.3,dew:2},{count:8,cross:true,shiftAt:3,dew:2},
       {count:8,cross:true,shiftAt:3,wind:.25,decoys:2,dew:2},{count:8,cross:true,mist:true,branches:2,wind:.28,shiftAt:3,dew:2},
       {count:8,cross:true,mist:true,branches:2,wind:.34,windFlip:true,shiftAt:3,wilt:true,decoys:2,dew:3}
@@ -1159,6 +1159,12 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
 
   function seedBranches(){
     var count=currentRules.branches||0;
+    if(liIdx===11){
+      /* Level 12 teaches two obstacles while preserving a generous central route. */
+      branches.push({x1:W*.04,y1:H*.44,x2:W*.25,y2:H*.36,phase:Math.random()*Math.PI*2});
+      branches.push({x1:W*.78,y1:H*.64,x2:W*.96,y2:H*.56,phase:Math.random()*Math.PI*2});
+      return
+    }
     for(var i=0;i<count;i++){
       var y=H*(.38+i*.22),left=W*(i%2?.16:.42),right=W*(i%2?.58:.84);
       branches.push({x1:left,y1:y+20,x2:right,y2:y-20,phase:Math.random()*Math.PI*2})
