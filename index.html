@@ -1148,7 +1148,7 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
       var row=i/(Math.max(1,nodeGoal-1)),zig=i%2===0?.27:.73;
       var nx=W*(.16+zig*.68)+(Math.random()-.5)*W*.08;
       var ny=margin+usableH*(.08+row*.76)+(Math.random()-.5)*H*.035;
-      nodes.push({x:nx,y:ny,bx:nx,by:ny,r:nodeRadius,fi:fidx,order:routeOrder[i],hit:false,bloom:0,phase:Math.random()*Math.PI*2,moving:!!currentRules.moving&&i%2===0,amp:Math.min(18,W*.045),speed:.0007+liIdx*.00012})
+      nodes.push({x:nx,y:ny,bx:nx,by:ny,ox:nx,oy:ny,r:nodeRadius,fi:fidx,order:routeOrder[i],hit:false,bloom:0,phase:Math.random()*Math.PI*2,moving:!!currentRules.moving&&i%2===0,amp:Math.min(18,W*.045),speed:.0007+liIdx*.00012})
     }
     var decoys=currentRules.decoys||0;
     for(var j=0;j<decoys;j++){
@@ -1296,7 +1296,16 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
 
   function resetRoute(x,y,message){
     playSound("wrong");
+    var resetShift=!!(currentRules&&currentRules.shiftAt&&shifted);
     for(var i=0;i<nodes.length;i++)if(nodes[i].order>=0)nodes[i].hit=false;
+    if(resetShift){
+      for(var nodeI=0;nodeI<nodes.length;nodeI++){
+        var node=nodes[nodeI];
+        if(node.order>=0){node.bx=node.ox;node.by=node.oy;node.x=node.ox;node.y=node.oy;node.bloom=0}
+      }
+      shifted=false;shiftBloom=0;
+      message=(message||"花阵散了，再引一次")+" · 花阵复原";
+    }
     failBloom={x:x,y:y,t:620};spBloom(x,y,LS[Math.min(liIdx,LS.length-1)].fi,14,true);
     nextNode=0;trace=[{x:x,y:y}];routeMsg=message||"花阵散了，再引一次";routeMsgTi=720;
     CD.textContent=routeMsg;CD.classList.remove("sh");void CD.offsetWidth;CD.classList.add("sh")
