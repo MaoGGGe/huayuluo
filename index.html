@@ -529,6 +529,11 @@ body::before{background:linear-gradient(180deg,rgba(255,255,255,.08),transparent
 #cw{border-radius:24px;border-color:rgba(255,255,255,.11);background:linear-gradient(180deg,rgba(24,29,49,.73),rgba(10,17,29,.84)),radial-gradient(120% 85% at 50% -12%,rgba(117,211,190,.1),transparent 55%);box-shadow:inset 0 1px 18px rgba(255,255,255,.05),0 24px 60px rgba(2,5,18,.34)}
 #gr .brand,#gr .hg{border-radius:16px;background:linear-gradient(135deg,rgba(255,255,255,.13),rgba(255,255,255,.055));border-color:rgba(255,255,255,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 8px 22px rgba(0,0,0,.12)}
 #gr .brand{font-family:inherit;color:var(--ink)}.mph,#gr .lr{border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,.1),rgba(255,255,255,.035));border-color:rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 10px 26px rgba(0,0,0,.12)}
+#gr .sound-toggle{display:inline-flex;align-items:center;justify-content:center;min-width:44px;height:34px;padding:0 10px;border:1px solid rgba(255,255,255,.18);border-radius:16px;background:linear-gradient(135deg,rgba(255,255,255,.13),rgba(255,255,255,.055));color:var(--ink);font:600 10px/1 inherit;letter-spacing:1px;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 8px 22px rgba(0,0,0,.12);-webkit-tap-highlight-color:transparent;touch-action:manipulation;transition:background .2s,color .2s,border-color .2s,transform .2s}
+#gr .sound-toggle:hover{background:rgba(255,255,255,.18)}
+#gr .sound-toggle:active{transform:scale(.95)}
+#gr .sound-toggle.off{color:var(--soft);border-color:rgba(255,255,255,.1);background:rgba(12,15,31,.22)}
+@media(max-width:440px){#gr .sound-toggle{min-width:38px;height:30px;padding:0 8px;font-size:9px}}
 #gr .ln{border-radius:16px;background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.2)}#gr .lrs{border-radius:10px;background:rgba(255,255,255,.06)}
 #gr .obtn,#gr .sk{border-radius:16px;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.24);box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 8px 24px rgba(0,0,0,.18)}
 #gr .obtn.pr{color:#221a28;background:linear-gradient(135deg,#fbe7aa,var(--gold) 52%,var(--gold-deep));box-shadow:0 12px 34px var(--gold-shadow),inset 0 1px 0 rgba(255,255,255,.65)}
@@ -550,6 +555,7 @@ body::before{background:linear-gradient(180deg,rgba(255,255,255,.08),transparent
     <span class="hg"><span class="sl">花蜜</span><span id="se" class="sv">0</span></span>
     <span class="hg"><span class="sl">花境</span><span id="ld" class="sv">1</span></span>
     <span class="hg rh"><span class="sl">最高</span><span id="be" class="sv">0</span></span>
+    <button id="sb" class="sound-toggle" type="button" aria-label="关闭音效" aria-pressed="true">音效</button>
   </div>
   <div id="tbw"><div id="tb" style="width:100%"></div></div>
   <div id="cw">
@@ -646,6 +652,7 @@ body::before{background:linear-gradient(180deg,rgba(255,255,255,.08),transparent
   var LE=document.getElementById("lesson"),LES=document.getElementById("lessonStart"),LEV=document.getElementById("lessonVisual"),LEK=document.getElementById("lessonKicker"),LET=document.getElementById("lessonTitle"),LEL=document.getElementById("lessonLead"),LER=document.getElementById("lessonRule");
   var AB=document.getElementById("ab"),RB=document.getElementById("rb"),MB=document.getElementById("mb");
   var BG=document.getElementById("bg"),SE=document.getElementById("se"),BE=document.getElementById("be"),MM=document.getElementById("mm");
+  var SB=document.getElementById("sb");
   var LD=document.getElementById("ld"),TB=document.getElementById("tb");
   var LI=document.getElementById("lii"),LN=document.getElementById("lnum"),LF=document.getElementById("lf");
   var LP=document.getElementById("lpo"),SK=document.getElementById("sk");
@@ -689,6 +696,77 @@ body::before{background:linear-gradient(180deg,rgba(255,255,255,.08),transparent
     {level:14,key:"wilt",mode:"dew",kicker:"第十五关 · 花期渐短",title:"花期将尽，借露争时",lead:"时间越少，未开的花会渐渐收拢。灵露与定风都能为你争取节奏。",rule:"集满三朵花，可点击定风两秒"},
     {level:16,key:"shift",mode:"cross",kicker:"第十七关 · 花阵变换",title:"花开后，花阵会换位",lead:"连对数朵花后，剩余花会轻轻换到新的位置。重新观察，不要沿旧路线判断。",rule:"换位只发生一次，香路不会中断"}
   ];
+  var audioCtx=null,audioMaster=null,soundOn=localStorage.getItem("ddSound")!=="0",lastSoundAt=0;
+
+  function updateSoundButton(){
+    SB.classList.toggle("off",!soundOn);
+    SB.textContent=soundOn?"音效":"静音";
+    SB.setAttribute("aria-pressed",soundOn?"true":"false");
+    SB.setAttribute("aria-label",soundOn?"关闭音效":"开启音效");
+  }
+
+  function unlockAudio(){
+    if(!soundOn)return null;
+    var AudioCtor=window.AudioContext||window.webkitAudioContext;
+    if(!AudioCtor)return null;
+    try{
+      if(!audioCtx){
+        audioCtx=new AudioCtor();
+        audioMaster=audioCtx.createGain();
+        audioMaster.gain.value=.32;
+        audioMaster.connect(audioCtx.destination);
+      }
+      if(audioCtx.state==="suspended")audioCtx.resume();
+      return audioCtx;
+    }catch(err){return null}
+  }
+
+  function soundTone(freq,delay,duration,volume,type,endFreq){
+    var ac=unlockAudio();
+    if(!ac||!audioMaster||!isFinite(freq))return;
+    var at=ac.currentTime+Math.max(0,delay||0),len=Math.max(.025,duration||.12),osc=ac.createOscillator(),gain=ac.createGain();
+    osc.type=type||"sine";osc.frequency.setValueAtTime(Math.max(30,freq),at);
+    if(endFreq&&isFinite(endFreq))osc.frequency.exponentialRampToValueAtTime(Math.max(30,endFreq),at+len);
+    gain.gain.setValueAtTime(.0001,at);
+    gain.gain.exponentialRampToValueAtTime(Math.max(.0001,volume||.05),at+.012);
+    gain.gain.exponentialRampToValueAtTime(.0001,at+len);
+    osc.connect(gain);gain.connect(audioMaster);osc.start(at);osc.stop(at+len+.03);
+  }
+
+  function soundChime(freq,delay,volume,decay){
+    soundTone(freq,delay,decay||.35,volume||.06,"sine");
+    soundTone(freq*2.01,(delay||0)+.004,(decay||.35)*.7,(volume||.06)*.24,"sine");
+  }
+
+  function soundWind(delay,duration,volume){
+    var ac=unlockAudio();
+    if(!ac||!audioMaster)return;
+    var at=ac.currentTime+Math.max(0,delay||0),len=Math.max(.04,duration||.22),frames=Math.max(1,Math.floor(ac.sampleRate*len)),buffer=ac.createBuffer(1,frames,ac.sampleRate),data=buffer.getChannelData(0);
+    for(var i=0;i<frames;i++)data[i]=(Math.random()*2-1)*(1-i/frames*.45);
+    var source=ac.createBufferSource(),filter=ac.createBiquadFilter(),gain=ac.createGain();
+    source.buffer=buffer;filter.type="bandpass";filter.frequency.setValueAtTime(1450,at);filter.frequency.exponentialRampToValueAtTime(760,at+len);filter.Q.value=.55;
+    gain.gain.setValueAtTime(.0001,at);gain.gain.exponentialRampToValueAtTime(Math.max(.0001,volume||.025),at+.025);gain.gain.exponentialRampToValueAtTime(.0001,at+len);
+    source.connect(filter);filter.connect(gain);gain.connect(audioMaster);source.start(at);source.stop(at+len+.03);
+  }
+
+  function playSound(kind,value){
+    if(!soundOn)return;
+    var stamp=performance.now();
+    if(kind!=="win"&&kind!=="fail"&&stamp-lastSoundAt<55)return;
+    lastSoundAt=stamp;
+    if(kind==="tap"){soundChime(587,0,.035,.16);return}
+    if(kind==="start"){soundChime(392,0,.045,.2);soundChime(494,.08,.05,.24);soundChime(587,.16,.055,.3);return}
+    if(kind==="correct"){var notes=[523.25,587.33,659.25,783.99,880];soundChime(notes[Math.max(0,Math.min(notes.length-1,(value||1)-1))],0,.065,.3);return}
+    if(kind==="dew"){soundChime(698.46,0,.05,.22);soundChime(1046.5,.07,.04,.28);return}
+    if(kind==="wrong"){soundTone(246.94,0,.16,.055,"triangle",164.81);soundWind(.01,.12,.018);return}
+    if(kind==="shield"){soundChime(392,0,.055,.36);soundChime(587.33,.11,.05,.42);soundWind(.03,.34,.014);return}
+    if(kind==="shift"){soundWind(0,.32,.02);soundChime(659.25,.12,.045,.3);return}
+    if(kind==="transition"){soundWind(0,.4,.026);soundChime(440,.12,.035,.22);soundChime(659.25,.22,.04,.3);return}
+    if(kind==="win"){var win=[523.25,659.25,783.99,1046.5,1174.66];for(var i=0;i<win.length;i++)soundChime(win[i],i*.1,.06,.5);soundWind(.08,.62,.025);return}
+    if(kind==="fail"){soundTone(293.66,0,.26,.045,"sine",196);soundWind(.02,.24,.016)}
+  }
+
+  updateSoundButton();
   var cb=parseInt(localStorage.getItem("ddB")||"0",10);
   var sp=(localStorage.getItem("ddP")||"").split(",").filter(Boolean).map(Number);
   cl=sp;BE.textContent=cb;
@@ -822,6 +900,7 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
 
   function beginGuide(){
     if(st!=="guide")return;
+    playSound("start");
     clearInterval(guideTimer);guideTimer=0;localStorage.setItem("ddGuideSeen","1");
     GU.classList.remove("show");GU.setAttribute("aria-hidden","true");
     st="p";lvTi=LT*1000;TB.style.width="100%";CD.textContent="引香 0/"+nodeGoal;SH.textContent="按住拖动花灵，依次连接花朵";
@@ -870,6 +949,7 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
 
   function beginLesson(){
     if(st!=="lesson"||!activeLesson)return;
+    playSound("start");
     markMechanicSeen(activeLesson.key);LE.classList.remove("show");LE.setAttribute("aria-hidden","true");
     st="p";lvTi=LT*1000;TB.style.width="100%";CD.textContent="引香 0/"+nodeGoal;SH.textContent=levelHint(liIdx);activeLesson=null;
   }
@@ -1181,6 +1261,7 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
   }
 
   function resetRoute(x,y,message){
+    playSound("wrong");
     for(var i=0;i<nodes.length;i++)if(nodes[i].order>=0)nodes[i].hit=false;
     failBloom={x:x,y:y,t:620};spBloom(x,y,LS[Math.min(liIdx,LS.length-1)].fi,14,true);
     nextNode=0;trace=[{x:x,y:y}];routeMsg=message||"花阵散了，再引一次";routeMsgTi=720;
@@ -1195,7 +1276,7 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
     }
     if(!nearest)return;
     if(nearest.order===nextNode){
-      nearest.hit=true;nearest.bloom=620;nextNode++;sc+=10+liIdx*2;SE.textContent=sc;
+      nearest.hit=true;nearest.bloom=620;nextNode++;playSound("correct",nextNode);sc+=10+liIdx*2;SE.textContent=sc;
       spEx(nearest.x,nearest.y,FC[nearest.fi].l||"#f8e2a4",16);spBloom(nearest.x,nearest.y,nearest.fi,12,false);
       CD.textContent="引香 "+nextNode+"/"+nodeGoal;
       SH.textContent=nextNode<nodeGoal?"继续引香，花阵正在盛开":"花阵已成，花海正在回应";
@@ -1211,7 +1292,7 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
     for(var i=0;i<rewards.length;i++){
       var reward=rewards[i],dx=x-reward.x,dy=y-reward.y;
       if(!reward.taken&&dx*dx+dy*dy<Math.pow(reward.r*1.75,2)){
-        reward.taken=true;sc+=12;SE.textContent=sc;routeMsg="灵露 +12";routeMsgTi=650;
+        reward.taken=true;playSound("dew");sc+=12;SE.textContent=sc;routeMsg="灵露 +12";routeMsgTi=650;
         CD.textContent=routeMsg;CD.classList.remove("sh");void CD.offsetWidth;CD.classList.add("sh");spEx(reward.x,reward.y,"#80efff",22)
       }
     }
@@ -1242,6 +1323,7 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
       var now=performance.now();
       if(currentRules.shiftAt&&!shifted&&nextNode>=currentRules.shiftAt){
         shifted=true;
+        playSound("shift");
         shiftBloom=900;
         for(var swap=0;swap<nodes.length;swap++){
           var sn=nodes[swap];
@@ -1499,6 +1581,7 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
   }
 
   function acSh(){
+    playSound("shield");
     shAc=true;shTi=2000;caSh=false;SH.textContent="定风中 · 花阵与时光静止";SH.classList.add("sh");
     var co=FC[LS[Math.min(liIdx,LS.length-1)].fi].l;
     for(var i=0;i<24;i++){
@@ -1508,6 +1591,7 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
   }
 
   function onLD(){
+    playSound("win");
     st="f";cancelAnimationFrame(aid);TB.style.width="0%";
     if(cl.indexOf(liIdx)===-1){cl.push(liIdx);sav()}
     var fs=sc;
@@ -1570,6 +1654,7 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
   }
 
   function onGO(){
+    playSound("fail");
     st="g";cancelAnimationFrame(aid);TB.style.width="0%";
     var nb=sc>cb;
     if(nb){cb=sc;localStorage.setItem("ddB",String(cb));BE.textContent=cb}
@@ -1608,6 +1693,7 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
     idx=Math.max(0,Math.min(tl-1,Number(idx)||0));
     clearLevelTransition();
     if(si2!==false&&idx>0){
+      playSound("transition");
       st="i";cancelAnimationFrame(aid);
       SK._idx=idx;
       var l=LS[Math.min(idx,LS.length-1)],f=FC[l.fi];
@@ -1632,6 +1718,7 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
   SK.addEventListener("click",function(){
     if(st==="i"&&!skSh)return;
     if(st==="i"){
+      playSound("tap");
       clearTimeout(levelStartTimer);clearTimeout(skipRevealTimer);SK.classList.remove("sh");LI.classList.remove("sh");
       var target=typeof SK._idx==="number"?SK._idx:liIdx;
       levelStartTimer=setTimeout(function(){
@@ -1643,6 +1730,13 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
   CV.addEventListener("click",function(){if(caSh&&!shAc)acSh()})
   GS.addEventListener("click",beginGuide)
   LES.addEventListener("click",beginLesson)
+  SB.addEventListener("click",function(){
+    soundOn=!soundOn;
+    localStorage.setItem("ddSound",soundOn?"1":"0");
+    updateSoundButton();
+    if(soundOn){unlockAudio();playSound("tap")}
+  });
+  document.addEventListener("pointerdown",unlockAudio,{passive:true});
 
   var lt=0;
   function loop(t){
@@ -1696,13 +1790,13 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
   AB.addEventListener("click",function(){
     var t=parseInt(AB.dataset.t,10);
     if(!isNaN(t)&&t>=0&&t<tl){
-      if(st==="f"){sL(t,true)}else{OV.classList.add("hd");iL(t);loop(performance.now())}
-    }else if(AB.dataset.t==="map"){shM()}
-    else shMenu()
+      if(st==="f"){sL(t,true)}else{playSound("start");OV.classList.add("hd");iL(t);loop(performance.now())}
+    }else if(AB.dataset.t==="map"){playSound("tap");shM()}
+    else{playSound("tap");shMenu()}
   });
   RB.addEventListener("click",function(){
     var t=parseInt(RB.dataset.t,10);
-    if(!isNaN(t)){OV.classList.add("hd");iL(t);loop(performance.now())}
+    if(!isNaN(t)){playSound("start");OV.classList.add("hd");iL(t);loop(performance.now())}
   });
   OS.addEventListener("click",function(e){
     if(st!=="m")return;
@@ -1710,7 +1804,7 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
     if(!row)return;
     var target=parseInt(row.dataset.l,10);
     if(!isNaN(target)&&target>=0&&target<tl){
-      clearLevelTransition();OV.classList.add("hd");iL(target);loop(performance.now())
+      playSound("start");clearLevelTransition();OV.classList.add("hd");iL(target);loop(performance.now())
     }
   });
   OS.addEventListener("keydown",function(e){
@@ -1720,11 +1814,11 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
     e.preventDefault();
     var target=parseInt(row.dataset.l,10);
     if(!isNaN(target)&&target>=0&&target<tl){
-      clearLevelTransition();OV.classList.add("hd");iL(target);loop(performance.now())
+      playSound("start");clearLevelTransition();OV.classList.add("hd");iL(target);loop(performance.now())
     }
   });
-  MB.addEventListener("click",function(){shM()});
-  MM.addEventListener("click",function(){shM()});
+  MB.addEventListener("click",function(){playSound("tap");shM()});
+  MM.addEventListener("click",function(){playSound("tap");shM()});
 
   resizeCv();
   startIntro()
