@@ -1269,6 +1269,16 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
     dx=p.x-px;dy=p.y-py;return dx*dx+dy*dy
   }
 
+  function closestPointOnSegment(p,a,b){
+    var dx=b.x-a.x,dy=b.y-a.y,length=dx*dx+dy*dy,ratio=length?Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/length)):0;
+    return{x:a.x+dx*ratio,y:a.y+dy*ratio}
+  }
+
+  function pointInTriangle(p,a,b,c){
+    var ab=orient(a,b,p),bc=orient(b,c,p),ca=orient(c,a,p),hasNegative=ab<0||bc<0||ca<0,hasPositive=ab>0||bc>0||ca>0;
+    return !(hasNegative&&hasPositive)
+  }
+
   function segmentDistanceSq(a,b,c,d){
     if(segmentsCross(a,b,c,d))return 0;
     return Math.min(pointSegmentDistanceSq(a,c,d),pointSegmentDistanceSq(b,c,d),pointSegmentDistanceSq(c,a,b),pointSegmentDistanceSq(d,a,b))
@@ -1358,8 +1368,9 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
   }
 
   function resolveShiftLayout(){
-    var active=[],windPadding=Math.max(10,Math.min(24,W*(currentRules.wind||0)*.2));
-    for(var i=0;i<nodes.length;i++)if(nodes[i].order>=0&&!nodes[i].hit)active.push(nodes[i]);
+    var active=[],completed=[],windPadding=Math.max(10,Math.min(24,W*(currentRules.wind||0)*.2));
+    for(var i=0;i<nodes.length;i++)if(nodes[i].order>=0){if(nodes[i].hit)completed.push(nodes[i]);else active.push(nodes[i])}
+    var hasInnerZone=completed.length===3&&Math.abs(orient(completed[0],completed[1],completed[2]))>120;
     for(var pass=0;pass<6;pass++){
       for(var left=0;left<active.length;left++)for(var right=left+1;right<active.length;right++){
         var a=active[left],b=active[right],dx=b.bx-a.bx,dy=b.by-a.by,distance=Math.sqrt(dx*dx+dy*dy),required=a.r+b.r+windPadding;
@@ -1368,6 +1379,20 @@ window.addEventListener("orientationchange",function(){setTimeout(resizeCv,200)}
         var push=(required-distance)*.5,ux=dx/distance,uy=dy/distance;
         a.bx=Math.max(a.r+14,Math.min(W-a.r-14,a.bx-ux*push));a.by=Math.max(a.r+18,Math.min(H-a.r-38,a.by-uy*push));
         b.bx=Math.max(b.r+14,Math.min(W-b.r-14,b.bx+ux*push));b.by=Math.max(b.r+18,Math.min(H-b.r-38,b.by+uy*push));
+      }
+      /* Completed flowers form a visual inner circle; new targets must spawn outside it. */
+      if(hasInnerZone)for(var innerI=0;innerI<active.length;innerI++){
+        var innerFlower=active[innerI],innerPoint={x:innerFlower.bx,y:innerFlower.by};
+        if(!pointInTriangle(innerPoint,completed[0],completed[1],completed[2]))continue;
+        var sides=[[completed[0],completed[1]],[completed[1],completed[2]],[completed[2],completed[0]]],nearest=null,nearestStart=null,nearestEnd=null,nearestDistance=Infinity;
+        for(var sideI=0;sideI<sides.length;sideI++){
+          var candidate=closestPointOnSegment(innerPoint,sides[sideI][0],sides[sideI][1]),candidateX=innerPoint.x-candidate.x,candidateY=innerPoint.y-candidate.y,candidateDistance=candidateX*candidateX+candidateY*candidateY;
+          if(candidateDistance<nearestDistance){nearest=candidate;nearestStart=sides[sideI][0];nearestEnd=sides[sideI][1];nearestDistance=candidateDistance}
+        }
+        var edgeX=nearestEnd.x-nearestStart.x,edgeY=nearestEnd.y-nearestStart.y,edgeLength=Math.sqrt(edgeX*edgeX+edgeY*edgeY)||1,normalX=-edgeY/edgeLength,normalY=edgeX/edgeLength,centerX=(completed[0].x+completed[1].x+completed[2].x)/3,centerY=(completed[0].y+completed[1].y+completed[2].y)/3;
+        if(normalX*(centerX-nearest.x)+normalY*(centerY-nearest.y)>0){normalX=-normalX;normalY=-normalY}
+        var innerClearance=innerFlower.r+windPadding+18;
+        innerFlower.bx=Math.max(innerFlower.r+14,Math.min(W-innerFlower.r-14,nearest.x+normalX*innerClearance));innerFlower.by=Math.max(innerFlower.r+18,Math.min(H-innerFlower.r-38,nearest.y+normalY*innerClearance));
       }
       /* Shifted targets must also leave a clean exit from the completed route. */
       for(var flowerI=0;flowerI<active.length;flowerI++)for(var seg=1;seg<trace.length;seg++){
